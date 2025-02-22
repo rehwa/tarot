@@ -245,21 +245,21 @@
 
         <div class="card-result">
             <div class="card">
-                <h3>양력 카드(Solar)</h3>
+                <h3>양력(SOLAR) 카드</h3>
                 <div class="date-display" id="solarDate">양력: -</div>
                 <div id="solarCardInfo" class="card-info"></div>
             </div>
             <div class="card">
-                <h3>음력 카드(Lunar)</h3>
+                <h3>음력(LUNAR) 카드</h3>
                 <div class="date-display" id="lunarDate">음력: -</div>
                 <div id="lunarCardInfo" class="card-info"></div>
             </div>
             <div class="card">
-                <h3>그림자 카드(Shadow)</h3>
+                <h3>그림자(SHADOW) 카드</h3>
                 <div id="shadowCardInfo" class="card-info"></div>
             </div>
             <div class="card">
-                <h3>소울 카드(Soul)</h3>
+                <h3>소울(SOUL) 카드</h3>
                 <div id="soulCardInfo" class="card-info"></div>
             </div>
         </div>
@@ -283,7 +283,7 @@
                 </button>
             </div>
             <div class="copyright">
-                LENA Academy & Curated by Rehwa, in the JWF<br>
+                LENA Academy & Curated by REHWA, in the JWF<br>
 		© 2025 JWF. All rights reserved.
             </div>
         </div>
@@ -950,8 +950,8 @@
             // 소울 카드이고 숫자가 21 이하인 경우
             if (elementId === 'soulCardInfo' && cardNumber <= 21) {
                 cardInfoDiv.innerHTML = `
-                    <div class="card-name">해당 없음</div>
-                    <div class="card-meaning">양력 숫자가 21 이하일 경우 소울 카드는 없습니다.</div>
+                    <div class="card-name">N/A</div>
+                    <div class="card-meaning">해당 없음</div>
                 `;
                 return;
             }
