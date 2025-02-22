@@ -174,6 +174,10 @@
                     <input type="radio" name="calendarType" value="lunar">
                     음력
                 </label>
+                <label id="leapMonthContainer" style="display: none;">
+                    <input type="checkbox" id="isLeapMonth">
+                    윤달
+                </label>
             </div>
 
             <div class="date-inputs">
@@ -213,7 +217,7 @@
 
     <script>
         // KASI API 설정
-        const KASI_API_KEY = 'MlLYiLsWAQ6xS8wiGu%2B0xnqhHeVSyR0OCXDQGAwVLbjJHK1ZHunwfpiDCFv%2FqZoPfug6onGR%2FVBNmOdaf85n5g%3D%3D';
+        const KASI_API_KEY = 'YOUR_API_KEY';
         const KASI_BASE_URL = 'https://apis.data.go.kr/B090041/openapi/service/LrsrCldInfoService';
 
         // 타로 카드 정보
@@ -334,6 +338,8 @@
         const monthSelect = document.getElementById('month');
         const daySelect = document.getElementById('day');
         const loadingContainer = document.getElementById('loadingContainer');
+        const leapMonthContainer = document.getElementById('leapMonthContainer');
+        const isLeapMonthCheckbox = document.getElementById('isLeapMonth');
 
         // 양력 -> 음력 변환
         async function solarToLunar(solYear, solMonth, solDay) {
@@ -386,7 +392,7 @@
                     `&lunYear=${lunYear}` +
                     `&lunMonth=${String(lunMonth).padStart(2, '0')}` +
                     `&lunDay=${String(lunDay).padStart(2, '0')}` +
-                    `&lunLeapmonth=${isLeapMonth ? '1' : '0'}`;
+                    `&leapMonth=${isLeapMonth ? '1' : '0'}`; // 수정된 파라미터 이름
 
                 const response = await fetch(url);
                 const text = await response.text();
@@ -421,7 +427,7 @@
         }
 
         // 날짜 변환 통합 함수
-        async function convertDate(year, month, day, isSolar) {
+        async function convertDate(year, month, day, isSolar, isLeapMonth = false) {
             try {
                 if (isSolar) {
                     const lunarDate = await solarToLunar(year, month, day);
@@ -435,14 +441,19 @@
                         }
                     };
                 } else {
-                    const solarDate = await lunarToSolar(year, month, day);
+                    const solarDate = await lunarToSolar(year, month, day, isLeapMonth);
                     return {
                         solar: {
                             year: solarDate.year,
                             month: solarDate.month,
                             day: solarDate.day
                         },
-                        lunar: { year, month, day }
+                        lunar: { 
+                            year, 
+                            month, 
+                            day,
+                            isLeapMonth 
+                        }
                     };
                 }
             } catch (error) {
@@ -478,44 +489,6 @@
             }
         }
 
-        function calculateBirthNumber(number) {
-            const firstSum = String(number).split('').map(Number).reduce((a, b) => a + b, 0);
-            
-            if (firstSum > 21) {
-                const finalSum = String(firstSum).split('').map(Number).reduce((a, b) => a + b, 0);
-                return {
-                    firstSum: firstSum,
-                    finalSum: finalSum
-                };
-            }
-            
-            return {
-                firstSum: firstSum,
-                finalSum: firstSum
-            };
-        }
-
-        function displayCardInfo(elementId, cardNumber) {
-            const cardInfoDiv = document.getElementById(elementId);
-            
-            if (elementId === 'soulCardInfo' && (!cardNumber || cardNumber <= 21)) {
-                cardInfoDiv.innerHTML = `
-                    <div class="card-name">해당 없음</div>
-                    <div class="card-meaning">양력 숫자가 21 이하일 경우 소울 카드는 없습니다.</div>
-                `;
-                return;
-            }
-            
-            const adjustedNumber = ((cardNumber - 1 + 22) % 22) + 1;
-            const card = tarotCards.find(c => parseInt(c.number) === adjustedNumber);
-            if (card) {
-                cardInfoDiv.innerHTML = `
-                    <div class="card-name">${card.number}. ${card.name}</div>
-                    <div class="card-meaning">${card.meaning}</div>
-                `;
-            }
-        }
-
         async function calculateCards() {
             if (!yearSelect.value || !monthSelect.value || !daySelect.value) {
                 document.getElementById('errorContainer').textContent = '년, 월, 일을 모두 선택해주세요.';
@@ -526,12 +499,13 @@
             const month = parseInt(monthSelect.value);
             const day = parseInt(daySelect.value);
             const isSolar = document.querySelector('input[name="calendarType"]:checked').value === 'solar';
+            const isLeapMonth = !isSolar && isLeapMonthCheckbox.checked;
 
             try {
                 loadingContainer.textContent = '변환 중...';
                 document.getElementById('errorContainer').textContent = '';
 
-                const dateInfo = await convertDate(year, month, day, isSolar);
+                const dateInfo = await convertDate(year, month, day, isSolar, isLeapMonth);
 
                 // 결과 표시
                 document.getElementById('solarDate').textContent = 
@@ -580,8 +554,17 @@
 
         // 이벤트 리스너 등록
         document.querySelectorAll('input[name="calendarType"]').forEach(radio => {
-            radio.addEventListener('change', calculateCards);
+            radio.addEventListener('change', (e) => {
+                const isLunar = e.target.value === 'lunar';
+                leapMonthContainer.style.display = isLunar ? 'inline' : 'none';
+                if (!isLunar) {
+                    isLeapMonthCheckbox.checked = false;
+                }
+                calculateCards();
+            });
         });
+
+        isLeapMonthCheckbox.addEventListener('change', calculateCards);
         yearSelect.addEventListener('change', () => {
             updateDays();
             calculateCards();
@@ -596,4 +579,3 @@
         initializeDateSelects();
     </script>
 </body>
-</html>
