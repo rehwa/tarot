@@ -970,8 +970,10 @@
 	    const lunarDate = document.getElementById('lunarDate').textContent;
 	    const text = `${solarDate}\n${lunarDate}\n\n` + Array.from(cardResults.querySelectorAll('.card')).map(card => {
 	        const title = card.querySelector('h3').textContent;
-	        const info = card.querySelector('.card-info').textContent;
-	        return `${title}\n${info}`;
+	        const info = card.querySelector('.card-info').textContent.trim();
+	        const cardName = info.split('\n')[0].trim();
+	        const cardMeaning = info.split('\n')[1].trim();
+	        return `${title}\n${cardName}\n${cardMeaning}`;
 	    }).join('\n\n');
 	    
 	    navigator.clipboard.writeText(text).then(() => {
@@ -982,7 +984,7 @@
 	        }, 2000);
 	    });
 	}
-	// 이미지 저장 함수
+	    // 이미지 저장 함수
 	function saveImage() {
 	    const element = document.querySelector('.card-result');
 	    html2canvas(element).then(canvas => {
@@ -1005,8 +1007,10 @@
 	    const lunarDate = document.getElementById('lunarDate').textContent;
 	    const text = `${solarDate}\n${lunarDate}\n\n` + Array.from(cardResults.querySelectorAll('.card')).map(card => {
 	        const title = card.querySelector('h3').textContent;
-	        const info = card.querySelector('.card-info').textContent;
-	        return `${title}\n${info}`;
+	        const info = card.querySelector('.card-info').textContent.trim();
+	        const cardName = info.split('\n')[0].trim();
+	        const cardMeaning = info.split('\n')[1].trim();
+	        return `${title}\n${cardName}\n${cardMeaning}`;
 	    }).join('\n\n');
 	
 	    try {
@@ -1026,7 +1030,6 @@
 	                        btn.innerHTML = '<span>결과 공유</span>';
 	                    }, 2000);
 	                } catch (error) {
-	                    // 이미지 공유가 실패하면 텍스트만 공유 시도
 	                    try {
 	                        await navigator.share({
 	                            text: text
@@ -1045,7 +1048,6 @@
 	            }
 	        });
 	    } catch (error) {
-	        // html2canvas 실패 시 텍스트만 공유
 	        if (navigator.share) {
 	            try {
 	                await navigator.share({
@@ -1063,8 +1065,7 @@
 	            copyResult();
 	        }
 	    }
-	}
-	
+	}	
 	// 페이지 로드 시 모바일 체크
 	window.addEventListener('load', function() {
 	    const shareBtn = document.getElementById('shareBtn');
