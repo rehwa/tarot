@@ -145,10 +145,48 @@
             display: block;
         }
 
-        @media (min-width: 768px) {
+	@media (min-width: 768px) {
             .card-result {
                 grid-template-columns: repeat(2, 1fr);
             }
+        }
+
+        /* Footer 스타일 추가 */
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .share-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .share-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .share-btn:hover {
+            background-color: #357abd;
+        }
+
+        .copyright {
+            color: #666;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -200,6 +238,20 @@
             <div class="card">
                 <h3>소울 카드(Soul)</h3>
                 <div id="soulCardInfo" class="card-info"></div>
+            </div>
+        </div>
+	            <!-- 여기에 새로운 footer 추가 -->
+        <div class="footer">
+            <div class="share-buttons">
+                <button onclick="copyUrl()" class="share-btn">
+                    <span>주소 복사</span>
+                </button>
+                <button onclick="shareUrl()" class="share-btn">
+                    <span>링크 공유</span>
+                </button>
+            </div>
+            <div class="copyright">
+                LENA Academy & Curated by JWF © 2025 JWF. All rights reserved.
             </div>
         </div>
     </div>
@@ -370,7 +422,7 @@
                 meaning: "전통, 가르침, 신념, 도덕적 가치관. 지식 전달과 교육에 재능이 있으며, 영적 지도자의 기질을 가집니다."
             },
             {
-                name: "연인(The Lovers)",
+                name: "연인들(The Lovers)",
                 number: "6",
                 meaning: "선택, 사랑, 조화, 균형. 인간관계가 원만하고 친화력이 좋으며, 심미적 감각이 뛰어나고 균형 잡힌 판단력을 지닙니다."
             },
@@ -420,7 +472,7 @@
                 meaning: "욕망, 집착, 속박, 강한 개성. 물질적 성공에 대한 야망이 있으며, 자유와 해방을 추구합니다."
             },
             {
-                name: "탑(The Tower)",
+                name: "흔들리는 탑(The Tower)",
                 number: "16",
                 meaning: "파괴, 해방, 각성, 혁신. 파격적인 성격을 지니며, 급진적 변화를 추구하고 과감한 도전정신을 가집니다."
             },
@@ -440,7 +492,7 @@
                 meaning: "성공, 활력, 행복, 긍정성. 밝고 긍정적인 성격을 지니며, 타고난 리더십과 성공과 번영의 기운을 가집니다."
             },
             {
-                name: "심판(Judgement)",
+                name: "심판, 부활(Judgement)",
                 number: "20",
                 meaning: "부활, 각성, 소명, 혁신. 높은 사명감과 책임감을 지니며, 자기혁신의 능력과 영적 깨달음을 추구합니다."
             },
@@ -755,7 +807,35 @@
                 daySelect.value = '';
             }
         }
+	    
+	// URL 복사 함수
+        function copyUrl() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('주소가 클립보드에 복사되었습니다.');
+            }).catch(err => {
+                console.error('URL 복사 실패:', err);
+                alert('주소 복사에 실패했습니다.');
+            });
+        }
 
+        // 공유하기 함수
+        function shareUrl() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Tarot Birth-Card Reading',
+                    url: window.location.href
+                }).catch(err => {
+                    console.error('공유하기 실패:', err);
+                });
+            } else {
+                copyUrl(); // 공유 API를 지원하지 않는 경우 URL 복사로 대체
+            }
+        }
+
+        // 초기화
+        initializeDateSelects();
+	    
         function calculateCards() {
             if (!validateInputs()) return;
         
