@@ -216,10 +216,6 @@
     </div>
 
     <script>
-        // KASI API 설정
-        const KASI_API_KEY = 'MILYILsWAQ6xS8wiGu%2B0xnqhHeVSyR0OCXDQGAwVLbjJHK1ZHunwfpiDCFv%2FFqZoPfug6onGR%2FFVBNmOdaf85n5g%3D%3D';
-        const KASI_BASE_URL = 'https://apis.data.go.kr/B090041/openapi/service/LrsrCldInfoService';
-
         // 타로 카드 정보
         const tarotCards = [
             {
@@ -341,87 +337,53 @@
         const leapMonthContainer = document.getElementById('leapMonthContainer');
         const isLeapMonthCheckbox = document.getElementById('isLeapMonth');
 
-        // 양력 -> 음력 변환
+        // solarToLunar 함수 전체를 새로운 버전으로 교체
         async function solarToLunar(solYear, solMonth, solDay) {
             try {
-                const url = `${KASI_BASE_URL}/getLunCalInfo` +
-                    `?serviceKey=${KASI_API_KEY}` +
-                    `&solYear=${solYear}` +
-                    `&solMonth=${String(solMonth).padStart(2, '0')}` +
-                    `&solDay=${String(solDay).padStart(2, '0')}`;
-
+                const formattedMonth = String(solMonth).padStart(2, '0');
+                const formattedDay = String(solDay).padStart(2, '0');
+                const url = `https://api.holidays.kr/v1/conversion/lunar?solar=${solYear}${formattedMonth}${formattedDay}`;
+        
                 const response = await fetch(url);
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, "text/xml");
-
-                // API 에러 체크
-                const errorCode = xmlDoc.querySelector('resultCode');
-                if (errorCode && errorCode.textContent !== '00') {
-                    const errorMsg = xmlDoc.querySelector('resultMsg')?.textContent;
-                    throw new Error(errorMsg || '날짜 변환 중 오류가 발생했습니다.');
+                const data = await response.json();
+        
+                if (!data.success) {
+                    throw new Error(data.message || '날짜 변환 중 오류가 발생했습니다.');
                 }
-
-                // 결과 파싱
-                const lunYear = xmlDoc.querySelector('lunYear')?.textContent;
-                const lunMonth = xmlDoc.querySelector('lunMonth')?.textContent;
-                const lunDay = xmlDoc.querySelector('lunDay')?.textContent;
-                const lunLeapmonth = xmlDoc.querySelector('lunLeapmonth')?.textContent;
-
-                if (!lunYear || !lunMonth || !lunDay) {
-                    throw new Error('유효하지 않은 날짜입니다.');
-                }
-
+        
                 return {
-                    year: parseInt(lunYear),
-                    month: parseInt(lunMonth),
-                    day: parseInt(lunDay),
-                    isLeapMonth: lunLeapmonth === '1'
+                    year: parseInt(data.lunar.year),
+                    month: parseInt(data.lunar.month),
+                    day: parseInt(data.lunar.day),
+                    isLeapMonth: data.lunar.leapMonth
                 };
             } catch (error) {
-                console.error('KASI API Error:', error);
+                console.error('API Error:', error);
                 throw new Error('날짜 변환 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
             }
         }
-
-                // 음력 -> 양력 변환
+        
+        // lunarToSolar 함수도 전체를 새로운 버전으로 교체
         async function lunarToSolar(lunYear, lunMonth, lunDay, isLeapMonth = false) {
             try {
-                const url = `${KASI_BASE_URL}/getSolCalInfo` +
-                    `?serviceKey=${KASI_API_KEY}` +
-                    `&lunYear=${lunYear}` +
-                    `&lunMonth=${String(lunMonth).padStart(2, '0')}` +
-                    `&lunDay=${String(lunDay).padStart(2, '0')}` +
-                    `&lunLeapmonth=${isLeapMonth ? '1' : '0'}`; // 'leapMonth'를 'lunLeapmonth'로 수정
-
+                const formattedMonth = String(lunMonth).padStart(2, '0');
+                const formattedDay = String(lunDay).padStart(2, '0');
+                const url = `https://api.holidays.kr/v1/conversion/solar?lunar=${lunYear}${formattedMonth}${formattedDay}`;
+        
                 const response = await fetch(url);
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, "text/xml");
-
-                // API 에러 체크
-                const errorCode = xmlDoc.querySelector('resultCode');
-                if (errorCode && errorCode.textContent !== '00') {
-                    const errorMsg = xmlDoc.querySelector('resultMsg')?.textContent;
-                    throw new Error(errorMsg || '날짜 변환 중 오류가 발생했습니다.');
+                const data = await response.json();
+        
+                if (!data.success) {
+                    throw new Error(data.message || '날짜 변환 중 오류가 발생했습니다.');
                 }
-
-                // 결과 파싱
-                const solYear = xmlDoc.querySelector('solYear')?.textContent;
-                const solMonth = xmlDoc.querySelector('solMonth')?.textContent;
-                const solDay = xmlDoc.querySelector('solDay')?.textContent;
-
-                if (!solYear || !solMonth || !solDay) {
-                    throw new Error('유효하지 않은 날짜입니다.');
-                }
-
+        
                 return {
-                    year: parseInt(solYear),
-                    month: parseInt(solMonth),
-                    day: parseInt(solDay)
+                    year: parseInt(data.solar.year),
+                    month: parseInt(data.solar.month),
+                    day: parseInt(data.solar.day)
                 };
             } catch (error) {
-                console.error('KASI API Error:', error);
+                console.error('API Error:', error);
                 throw new Error('날짜 변환 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
             }
         }
