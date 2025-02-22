@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarot Birth Card Reading</title>
+    <title>Tarot Birth-Card Reading</title>
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -145,12 +145,6 @@
             display: block;
         }
 
-        .loading {
-            text-align: center;
-            color: var(--primary-color);
-            margin: 10px 0;
-        }
-
         @media (min-width: 768px) {
             .card-result {
                 grid-template-columns: repeat(2, 1fr);
@@ -160,9 +154,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Tarot Birth Card Reading</h1>
+        <h1>타로 생일수 계산기</h1>
         <div id="errorContainer" class="error-message" role="alert"></div>
-        <div id="loadingContainer" class="loading"></div>
 
         <div class="input-group">
             <div class="radio-group">
@@ -174,50 +167,181 @@
                     <input type="radio" name="calendarType" value="lunar">
                     음력
                 </label>
-                <label id="leapMonthContainer" style="display: none;">
-                    <input type="checkbox" id="isLeapMonth">
-                    윤달
-                </label>
             </div>
 
             <div class="date-inputs">
-                <select id="year" aria-label="년도 선택">
-                    <option value="" selected disabled>년도 선택</option>
-                </select>
-                <select id="month" aria-label="월 선택">
-                    <option value="" selected disabled>월 선택</option>
-                </select>
-                <select id="day" aria-label="일 선택">
-                    <option value="" selected disabled>일 선택</option>
-                </select>
+    		<select id="year" aria-label="년도 선택">
+    			<option value="" selected disabled>년도 선택</option>
+		</select>
+		<select id="month" aria-label="월 선택">
+    			<option value="" selected disabled>월 선택</option>
+		</select>
+		<select id="day" aria-label="일 선택">
+    			<option value="" selected disabled>일 선택</option>
+		</select>
             </div>
         </div>
 
         <div class="card-result">
             <div class="card">
-                <h3>양력 카드(Solar)</h3>
+                <h3>양력 카드</h3>
                 <div class="date-display" id="solarDate">양력: -</div>
                 <div id="solarCardInfo" class="card-info"></div>
             </div>
             <div class="card">
-                <h3>음력 카드(Lunar)</h3>
+                <h3>음력 카드</h3>
                 <div class="date-display" id="lunarDate">음력: -</div>
                 <div id="lunarCardInfo" class="card-info"></div>
             </div>
             <div class="card">
-                <h3>그림자 카드(Shadow)</h3>
+                <h3>그림자 카드</h3>
                 <div id="shadowCardInfo" class="card-info"></div>
             </div>
             <div class="card">
-                <h3>소울 카드(Soul)</h3>
+                <h3>소울 카드</h3>
                 <div id="soulCardInfo" class="card-info"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const KASI_API_KEY = 'MILYILsWAQ6xS8wiGu%2B0xnqhHeVSyR0OCXDQGAwVLbjJHK1ZHunwfpiDCFv%2FFqZoPfug6onGR%2FFVBNmOdaf85n5g%3D%3D';
-        const KASI_BASE_URL = 'https://apis.data.go.kr/B090041/openapi/service/LrsrCldInfoService';
+        const yearSelect = document.getElementById('year');
+        const monthSelect = document.getElementById('month');
+        const daySelect = document.getElementById('day');
+        // 음력 달력 배열 상수 정의
+        const currentYear = new Date().getFullYear();
+        const LUNAR_LAST_YEAR = 1939;
+        const lunarMonthTable = [
+            [2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 2],   /* 양력 1940년 1월은 음력 1939년에 있음 그래서 시작년도는 1939년*/
+            [2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1],
+            [2, 2, 1, 2, 2, 4, 1, 1, 2, 1, 2, 1],   /* 1941 */
+            [2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 1, 2],
+            [1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1, 2],
+            [1, 1, 2, 4, 1, 2, 1, 2, 2, 1, 2, 2],
+            [1, 1, 2, 1, 1, 2, 1, 2, 2, 2, 1, 2],
+            [2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2],
+            [2, 5, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2],
+            [2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2],
+            [2, 2, 1, 2, 1, 2, 3, 2, 1, 2, 1, 2],
+            [2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 1],
+            [2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2],   /* 1951 */
+            [1, 2, 1, 2, 4, 2, 1, 2, 1, 2, 1, 2],
+            [1, 2, 1, 1, 2, 2, 1, 2, 2, 1, 2, 2],
+            [1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2],
+            [2, 1, 4, 1, 1, 2, 1, 2, 1, 2, 2, 2],
+            [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2],
+            [2, 1, 2, 1, 2, 1, 1, 5, 2, 1, 2, 2],
+            [1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2],
+            [1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+            [2, 1, 2, 1, 2, 5, 2, 1, 2, 1, 2, 1],
+            [2, 1, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2],   /* 1961 */
+            [1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1],
+            [2, 1, 2, 3, 2, 1, 2, 1, 2, 2, 2, 1],
+            [2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 2],
+            [1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 2],
+            [1, 2, 5, 2, 1, 1, 2, 1, 1, 2, 2, 1],
+            [2, 2, 1, 2, 2, 1, 1, 2, 1, 2, 1, 2],
+            [1, 2, 2, 1, 2, 1, 5, 2, 1, 2, 1, 2],
+            [1, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1],
+            [2, 1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2],
+            [1, 2, 1, 1, 5, 2, 1, 2, 2, 2, 1, 2],   /* 1971 */
+            [1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
+            [2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 2, 1],
+            [2, 2, 1, 5, 1, 2, 1, 1, 2, 2, 1, 2],
+            [2, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2],
+            [2, 2, 1, 2, 1, 2, 1, 5, 2, 1, 1, 2],
+            [2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 1],
+            [2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1],
+            [2, 1, 1, 2, 1, 6, 1, 2, 2, 1, 2, 1],
+            [2, 1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2],
+            [1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 2, 2],   /* 1981 */
+            [2, 1, 2, 3, 2, 1, 1, 2, 2, 1, 2, 2],
+            [2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2],
+            [2, 1, 2, 2, 1, 1, 2, 1, 1, 5, 2, 2],
+            [1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2],
+            [1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1],
+            [2, 1, 2, 2, 1, 5, 2, 2, 1, 2, 1, 2],
+            [1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1],
+            [2, 1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2],
+            [1, 2, 1, 1, 5, 1, 2, 1, 2, 2, 2, 2],
+            [1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 2],   /* 1991 */
+            [1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2],
+            [1, 2, 5, 2, 1, 2, 1, 1, 2, 1, 2, 1],
+            [2, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2],
+            [1, 2, 2, 1, 2, 2, 1, 5, 2, 1, 1, 2],
+            [1, 2, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2],
+            [1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1],
+            [2, 1, 1, 2, 3, 2, 2, 1, 2, 2, 2, 1],
+            [2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 2, 1],
+            [2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 1],
+            [2, 2, 2, 3, 2, 1, 1, 2, 1, 2, 1, 2],   /* 2001 */
+            [2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1],
+            [2, 2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2],
+            [1, 5, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+            [1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1, 1],
+            [2, 1, 2, 1, 2, 1, 5, 2, 2, 1, 2, 2],
+            [1, 1, 2, 1, 1, 2, 1, 2, 2, 2, 1, 2],
+            [2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2],
+            [2, 2, 1, 1, 5, 1, 2, 1, 2, 1, 2, 2],
+            [2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2],
+            [2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 1],   /* 2011 */
+            [2, 1, 6, 2, 1, 2, 1, 1, 2, 1, 2, 1],
+            [2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+            [1, 2, 1, 2, 1, 2, 1, 2, 5, 2, 1, 2],
+            [1, 2, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1],
+            [2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2],
+            [2, 1, 1, 2, 3, 2, 1, 2, 1, 2, 2, 2],
+            [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2],
+            [2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2],
+            [2, 1, 2, 5, 2, 1, 1, 2, 1, 2, 1, 2],
+            [1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],   /* 2021 */
+            [2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2],
+            [1, 5, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2],
+            [1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1],
+            [2, 1, 2, 1, 1, 5, 2, 1, 2, 2, 2, 1],
+            [2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 2],
+            [1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 2],
+            [1, 2, 2, 1, 5, 1, 2, 1, 1, 2, 2, 1],
+            [2, 2, 1, 2, 2, 1, 1, 2, 1, 1, 2, 2],
+            [1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1],
+            [2, 1, 5, 2, 1, 2, 2, 1, 2, 1, 2, 1],   /* 2031 */
+            [2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1, 2],
+            [1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 5, 2],
+            [1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
+            [2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 2],
+            [2, 2, 1, 2, 1, 4, 1, 1, 2, 2, 1, 2],
+            [2, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2],
+            [2, 2, 1, 2, 1, 2, 1, 2, 1, 1, 2, 1],
+            [2, 2, 1, 2, 5, 2, 1, 2, 1, 2, 1, 1],
+            [2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1],
+            [2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1, 2],   /* 2041 */
+            [1, 5, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2],
+            [1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 2, 2]
+        ];
+
+        const leapMonthData = {
+            1900: { month: 8 }, 1903: { month: 5 }, 1906: { month: 4 },
+            1909: { month: 2 }, 1911: { month: 6 }, 1914: { month: 5 },
+            1917: { month: 2 }, 1919: { month: 7 }, 1922: { month: 5 },
+            1925: { month: 4 }, 1928: { month: 2 }, 1930: { month: 6 },
+            1933: { month: 5 }, 1936: { month: 3 }, 1938: { month: 7 },
+            1941: { month: 6 }, 1944: { month: 4 }, 1947: { month: 2 },
+            1949: { month: 7 }, 1952: { month: 5 }, 1955: { month: 3 },
+            1957: { month: 8 }, 1960: { month: 8 }, 1963: { month: 4 },
+            1966: { month: 3 }, 1968: { month: 7 }, 1971: { month: 5 },
+            1974: { month: 4 }, 1976: { month: 8 }, 1979: { month: 6 },
+            // 연도별 윤달 월 정보 추가
+            1982: { month: 4 }, 1984: { month: 10 }, 1987: { month: 6 },
+            1990: { month: 5 }, 1993: { month: 3 }, 1995: { month: 8 },
+            1998: { month: 5 }, 2001: { month: 4 }, 2004: { month: 2 },
+            2006: { month: 7 }, 2009: { month: 5 }, 2012: { month: 3 },
+            2014: { month: 9 }, 2017: { month: 5 }, 2020: { month: 4 },
+            2023: { month: 2 }, 2025: { month: 6 }, 2028: { month: 5 },
+            2031: { month: 3 }, 2033: { month: 11 }, 2036: { month: 6 },
+            2039: { month: 5 }, 2042: { month: 2 }, 2044: { month: 7 },
+            2047: { month: 5 }, 2050: { month: 3 }
+        };
+
         // 타로 카드 정보
         const tarotCards = [
             {
@@ -332,154 +456,244 @@
             }
         ];
 
-        const yearSelect = document.getElementById('year');
-        const monthSelect = document.getElementById('month');
-        const daySelect = document.getElementById('day');
-        const loadingContainer = document.getElementById('loadingContainer');
-        const leapMonthContainer = document.getElementById('leapMonthContainer');
-        const isLeapMonthCheckbox = document.getElementById('isLeapMonth');
-
-        async function solarToLunar(solYear, solMonth, solDay) {
-            try {
-                const url = `${KASI_BASE_URL}/getLunCalInfo` +
-                    `?serviceKey=${KASI_API_KEY}` +
-                    `&solYear=${solYear}` +
-                    `&solMonth=${String(solMonth).padStart(2, '0')}` +
-                    `&solDay=${String(solDay).padStart(2, '0')}`;
-        
-                const response = await fetch(url);
-                
-                // CORS 에러 발생 시에도 진행할 수 있도록
-                if (!response.ok) {
-                    return {
-                        year: solYear,
-                        month: solMonth,
-                        day: solDay,
-                        isLeapMonth: false
-                    };
-                }
-        
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, "text/xml");
-        
-                const errorCode = xmlDoc.querySelector('resultCode');
-                if (errorCode && errorCode.textContent !== '00') {
-                    return {
-                        year: solYear,
-                        month: solMonth,
-                        day: solDay,
-                        isLeapMonth: false
-                    };
-                }
-        
-                const lunYear = xmlDoc.querySelector('lunYear')?.textContent;
-                const lunMonth = xmlDoc.querySelector('lunMonth')?.textContent;
-                const lunDay = xmlDoc.querySelector('lunDay')?.textContent;
-                const lunLeapmonth = xmlDoc.querySelector('lunLeapmonth')?.textContent;
-        
-                if (!lunYear || !lunMonth || !lunDay) {
-                    return {
-                        year: solYear,
-                        month: solMonth,
-                        day: solDay,
-                        isLeapMonth: false
-                    };
-                }
-        
-                return {
-                    year: parseInt(lunYear),
-                    month: parseInt(lunMonth),
-                    day: parseInt(lunDay),
-                    isLeapMonth: lunLeapmonth === '1'
-                };
-            } catch (error) {
-                console.error('KASI API Error:', error);
-                // 에러 발생 시 입력한 날짜 그대로 반환
-                return {
-                    year: solYear,
-                    month: solMonth,
-                    day: solDay,
-                    isLeapMonth: false
-                };
-            }
-        }
-        
-        async function lunarToSolar(lunYear, lunMonth, lunDay, isLeapMonth = false) {
-            try {
-                const url = `${KASI_BASE_URL}/getSolCalInfo` +
-                    `?serviceKey=${KASI_API_KEY}` +
-                    `&lunYear=${lunYear}` +
-                    `&lunMonth=${String(lunMonth).padStart(2, '0')}` +
-                    `&lunDay=${String(lunDay).padStart(2, '0')}` +
-                    `&lunLeapmonth=${isLeapMonth ? '1' : '0'}`;
-        
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    return {
-                        year: lunYear,
-                        month: lunMonth,
-                        day: lunDay
-                    };
-                }
-        
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, "text/xml");
-        
-                const errorCode = xmlDoc.querySelector('resultCode');
-                if (errorCode && errorCode.textContent !== '00') {
-                    return {
-                        year: lunYear,
-                        month: lunMonth,
-                        day: lunDay
-                    };
-                }
-        
-                const solYear = xmlDoc.querySelector('solYear')?.textContent;
-                const solMonth = xmlDoc.querySelector('solMonth')?.textContent;
-                const solDay = xmlDoc.querySelector('solDay')?.textContent;
-        
-                if (!solYear || !solMonth || !solDay) {
-                    return {
-                        year: lunYear,
-                        month: lunMonth,
-                        day: lunDay
-                    };
-                }
-        
-                return {
-                    year: parseInt(solYear),
-                    month: parseInt(solMonth),
-                    day: parseInt(solDay)
-                };
-            } catch (error) {
-                console.error('KASI API Error:', error);
-                return {
-                    year: lunYear,
-                    month: lunMonth,
-                    day: lunDay
-                };
-            }
+        // myDate 객체 정의
+        function myDate(year, month, day, leapMonth) {
+            this.year = year;
+            this.month = month;
+            this.day = day;
+            this.leapMonth = leapMonth;
         }
 
-        // 날짜 변환 통합 함수
-        async function convertDate(year, month, day, isSolar, isLeapMonth = false) {
+        function lunarCalc(year, month, day, type, leapmonth) {
+            var solYear, solMonth, solDay;
+            var lunYear, lunMonth, lunDay;
+
+            // lunLeapMonth는 음력의 윤달인지 아닌지를 확인하기위한 변수
+            // 1일 경우 윤달이고 0일 경우 음달
+            var lunLeapMonth, lunMonthDay;
+            var i, lunIndex;
+
+            var solMonthDay = [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+            /* range check */
+            if (year < 1940 || year > 2040) {
+                throw new Error('1940년부터 2040년까지만 지원합니다');
+            }
+
+            /* 속도 개선을 위해 기준 일자를 여러개로 한다 */
+            if (year >= 2000) {
+                /* 기준일자 양력 2000년 1월 1일 (음력 1999년 11월 25일) */
+                solYear = 2000;
+                solMonth = 1;
+                solDay = 1;
+                lunYear = 1999;
+                lunMonth = 11;
+                lunDay = 25;
+                lunLeapMonth = 0;
+
+                solMonthDay[1] = 29;    /* 2000 년 2월 28일 */
+                lunMonthDay = 30;   /* 1999년 11월 */
+            }
+            else if (year >= 1970) {
+                /* 기준일자 양력 1970년 1월 1일 (음력 1969년 11월 24일) */
+                solYear = 1970;
+                solMonth = 1;
+                solDay = 1;
+                lunYear = 1969;
+                lunMonth = 11;
+                lunDay = 24;
+                lunLeapMonth = 0;
+
+                solMonthDay[1] = 28;    /* 1970 년 2월 28일 */
+                lunMonthDay = 30;   /* 1969년 11월 */
+            }
+            else {
+                /* 기준일자 양력 1940년 1월 1일 (음력 1939년 11월 22일) */
+                solYear = 1940;
+                solMonth = 1;
+                solDay = 1;
+                lunYear = 1939;
+                lunMonth = 11;
+                lunDay = 22;
+                lunLeapMonth = 0;
+
+                solMonthDay[1] = 29;    /* 1940 년 2월 28일 */
+                lunMonthDay = 29;   /* 1939년 11월 */
+            }
+
+            lunIndex = lunYear - LUNAR_LAST_YEAR;
+
+            // type이 1일때는 입력받은 양력 값에 대한 음력값을 반환
+            // 2일 때는 입력받은 음력 값에 대한 양력값을 반환
+            // 반복문이 돌면서 양력 값들과 음력 값들을 1일 씩 증가시키고
+            // 입력받은 날짜값과 양력 값이 일치할 때 음력값을 반환함
+            while (true) {
+                if (type == 1 &&
+                    year == solYear &&
+                    month == solMonth &&
+                    day == solDay) {
+                    return new myDate(lunYear, lunMonth, lunDay, lunLeapMonth);
+                }
+                else if (type == 2 &&
+                    year == lunYear &&
+                    month == lunMonth &&
+                    day == lunDay &&
+                    leapmonth == lunLeapMonth) {
+                    return new myDate(solYear, solMonth, solDay, 0);
+                }
+
+                // 양력의 마지막 날일 경우 년도를 증가시키고 나머지 초기화
+                if (solMonth == 12 && solDay == 31) {
+                    solYear++;
+                    solMonth = 1;
+                    solDay = 1;
+
+                    // 윤년일 시 2월달의 총 일수를 1일 증가
+                    if (solYear % 400 == 0)
+                        solMonthDay[1] = 29;
+                    else if (solYear % 100 == 0)
+                        solMonthDay[1] = 28;
+                    else if (solYear % 4 == 0)
+                        solMonthDay[1] = 29;
+                    else
+                        solMonthDay[1] = 28;
+
+                }
+                // 현재 날짜가 달의 마지막 날짜를 가리키고 있을 시 달을 증가시키고 날짜 1로 초기화
+                else if (solMonthDay[solMonth - 1] == solDay) {
+                    solMonth++;
+                    solDay = 1;
+                }
+                else
+                    solDay++;
+
+                // 음력의 마지막 날인 경우 년도를 증가시키고 달과 일수를 초기화
+                if (lunMonth == 12 &&
+                    ((lunarMonthTable[lunIndex][lunMonth - 1] == 1 && lunDay == 29) ||
+                        (lunarMonthTable[lunIndex][lunMonth - 1] == 2 && lunDay == 30))) {
+                    lunYear++;
+                    lunMonth = 1;
+                    lunDay = 1;
+
+                    if (lunYear > 2043) {
+                        alert("입력하신 달은 없습니다.");
+                        break;
+                    }
+
+                    // 년도가 바꼈으니 index값 수정
+                    lunIndex = lunYear - LUNAR_LAST_YEAR;
+
+                    // 음력의 1월에는 1 or 2만 있으므로 1과 2만 비교하면됨
+                    if (lunarMonthTable[lunIndex][lunMonth - 1] == 1)
+                        lunMonthDay = 29;
+                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 2)
+                        lunMonthDay = 30;
+                }
+                // 현재날짜가 이번달의 마지막날짜와 일치할 경우
+                else if (lunDay == lunMonthDay) {
+
+                    // 윤달인데 윤달계산을 안했을 경우 달의 숫자는 증가시키면 안됨
+                    if (lunarMonthTable[lunIndex][lunMonth - 1] >= 3
+                        && lunLeapMonth == 0) {
+                        lunDay = 1;
+                        lunLeapMonth = 1;
+                    }
+                    // 음달이거나 윤달을 계산 했을 겨우 달을 증가시키고 lunLeapMonth값 초기화
+                    else {
+                        lunMonth++;
+                        lunDay = 1;
+                        lunLeapMonth = 0;
+                    }
+
+                    // 음력의 달에 맞는 마지막날짜 초기화
+                    if (lunarMonthTable[lunIndex][lunMonth - 1] == 1)
+                        lunMonthDay = 29;
+                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 2)
+                        lunMonthDay = 30;
+                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 3)
+                        lunMonthDay = 29;
+                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 4 &&
+                        lunLeapMonth == 0)
+                        lunMonthDay = 29;
+                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 4 &&
+                        lunLeapMonth == 1)
+                        lunMonthDay = 30;
+                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 5 &&
+                        lunLeapMonth == 0)
+                        lunMonthDay = 30;
+                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 5 &&
+                        lunLeapMonth == 1)
+                        lunMonthDay = 29;
+                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 6)
+                        lunMonthDay = 30;
+                }
+                else
+                    lunDay++;
+                            // 윤달 체크 로직 추가
+            function isLeapMonth(year, month) {
+                return leapMonthData[year] && leapMonthData[year].month === month;
+            }
+        
+            // lunarCalc 함수 내에서 윤달 처리 수정
+            if (type === 2) { // 음력 -> 양력 변환 시
+                if (leapmonth && !isLeapMonth(year, month)) {
+                    throw new Error('해당 월은 윤달이 아닙니다.');
+                }
+            }
+            }
+        }
+
+
+        function solarToLunar(solYear, solMonth, solDay) {
+            // 날짜 형식이 안맞을 경우 공백 반환
+            if (!solYear || solYear == 0 ||
+                !solMonth || solMonth == 0 ||
+                !solDay || solDay == 0) {
+                return "";
+            }
+
+            // 양력의 달마다의 일수
+            var solMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+            // 윤년일 시 2월에 1일 추가
+            if (solYear % 400 == 0 || (solYear % 4 == 0 && solYear % 100 != 0)) solMonthDays[1] += 1;
+
+
+            if (solMonth < 1 || solMonth > 12 ||
+                solDay < 1 || solDay > solMonthDays[solMonth - 1]) {
+
+                return "";
+            }
+
+            /* 양력/음력 변환 */
+            var date = lunarCalc(solYear, solMonth, solDay, 1);
+
+            return "음력 " + date.year + "년 " + (date.leapMonth ? "(윤)" : "") + date.month + "월 " + date.day;
+        }
+
+        // 날짜 변환 함수 수정
+        function convertDate(year, month, day, isSolar) {
             try {
                 if (isSolar) {
-                    const lunarDate = await solarToLunar(year, month, day);
+                    // 양력 -> 음력 변환
+                    const lunarDate = lunarCalc(year, month, day, 1);
+                    const isLeap = leapMonthData[lunarDate.year] && 
+                                  leapMonthData[lunarDate.year].month === lunarDate.month;
+                    
                     return {
                         solar: { year, month, day },
                         lunar: {
                             year: lunarDate.year,
                             month: lunarDate.month,
                             day: lunarDate.day,
-                            isLeapMonth: lunarDate.isLeapMonth
+                            isLeap: isLeap
                         }
                     };
                 } else {
-                    const solarDate = await lunarToSolar(year, month, day, isLeapMonth);
+                    // 음력 -> 양력 변환
+                    const isLeap = leapMonthData[year] && leapMonthData[year].month === month;
+                    const solarDate = lunarCalc(year, month, day, 2, isLeap ? 1 : 0);
+                    
                     return {
                         solar: {
                             year: solarDate.year,
@@ -490,67 +704,74 @@
                             year, 
                             month, 
                             day,
-                            isLeapMonth 
+                            isLeap: isLeap
                         }
                     };
                 }
             } catch (error) {
-                throw new Error(error.message);
+                console.error('날짜 변환 중 오류:', error);
+                throw new Error('날짜 변환 중 오류가 발생했습니다. 올바른 날짜를 선택해주세요.');
             }
         }
 
-        function initializeDateSelects() {
-            // year select
-            yearSelect.innerHTML = '<option value="">년도</option>';
-            // 1940년부터 2040년까지로 제한
-            for (let y = 2025; y >= 1940; y--) {
-                yearSelect.innerHTML += `<option value="${y}">${y}년</option>`;
-            }
+        // 나머지 기존 함수들
+	function initializeDateSelects() {
+    	// year select
+    	const yearSelect = document.getElementById('year');
+    	yearSelect.innerHTML = '<option value="">년도</option>';
+    	// 1940년부터 2040년까지로 제한
+    	for (let y = 2040; y >= 1940; y--) {
+        	yearSelect.innerHTML += `<option value="${y}">${y}년</option>`;
+    	}
 
-            // month select
-            monthSelect.innerHTML = '<option value="">월</option>';
-            for (let m = 1; m <= 12; m++) {
-                monthSelect.innerHTML += `<option value="${m}">${m}월</option>`;
-            }
+    	// month select
+    	const monthSelect = document.getElementById('month');
+    	monthSelect.innerHTML = '<option value="">월</option>';
+    	for (let m = 1; m <= 12; m++) {
+        	const monthValue = m.toString().padStart(2, '0');
+        	monthSelect.innerHTML += `<option value="${monthValue}">${m}월</option>`;
+    	}
 
-            updateDays();
-        }
+    	// day select - 초기값은 31일로 설정
+    	const daySelect = document.getElementById('day');
+    	daySelect.innerHTML = '<option value="">일</option>';
+    	for (let d = 1; d <= 31; d++) {
+        	const dayValue = d.toString().padStart(2, '0');
+        	daySelect.innerHTML += `<option value="${dayValue}">${d}일</option>`;
+    	}
+}
 
         function updateDays() {
-            const year = parseInt(yearSelect.value) || new Date().getFullYear();
+            const year = parseInt(yearSelect.value) || currentYear;
             const month = parseInt(monthSelect.value) || 1;
             const lastDay = new Date(year, month, 0).getDate();
 
             daySelect.innerHTML = '<option value="">일</option>';
             for (let d = 1; d <= lastDay; d++) {
-                daySelect.innerHTML += `<option value="${d}">${d}일</option>`;
+                daySelect.innerHTML += `<option value="${d.toString().padStart(2, '0')}">${d}일</option>`;
+            }
+
+            if (parseInt(daySelect.value) > lastDay) {
+                daySelect.value = '';
             }
         }
 
-        async function calculateCards() {
-            if (!yearSelect.value || !monthSelect.value || !daySelect.value) {
-                document.getElementById('errorContainer').textContent = '년, 월, 일을 모두 선택해주세요.';
-                return;
-            }
+        function calculateCards() {
+            if (!validateInputs()) return;
         
             const year = parseInt(yearSelect.value);
             const month = parseInt(monthSelect.value);
             const day = parseInt(daySelect.value);
             const isSolar = document.querySelector('input[name="calendarType"]:checked').value === 'solar';
-            const isLeapMonth = !isSolar && isLeapMonthCheckbox.checked;
         
             try {
-                loadingContainer.textContent = '계산 중...';
-                document.getElementById('errorContainer').textContent = '';
-        
-                const dateInfo = await convertDate(year, month, day, isSolar, isLeapMonth);
+                const dateInfo = convertDate(year, month, day, isSolar);
         
                 // 결과 표시
                 document.getElementById('solarDate').textContent = 
                     `양력: ${dateInfo.solar.year}년 ${dateInfo.solar.month}월 ${dateInfo.solar.day}일`;
                 document.getElementById('lunarDate').textContent = 
-                    `음력: ${dateInfo.lunar.year}년 ${dateInfo.lunar.month}월 ${dateInfo.lunar.day}일` +
-                    (dateInfo.lunar.isLeapMonth ? ' (윤달)' : '');
+                    `음력: ${dateInfo.lunar.year}년 ${dateInfo.lunar.month}월 ${dateInfo.lunar.day}일`;
         
                 // 양력 계산
                 const solarInitialSum = dateInfo.solar.year + dateInfo.solar.month + dateInfo.solar.day;
@@ -565,21 +786,68 @@
                 displayCardInfo('lunarCardInfo', lunarResult.finalSum);
                 displayCardInfo('shadowCardInfo', 22 - solarResult.finalSum);
         
+                // 소울 카드: 첫 번째 합계가 22 이상일 때만 계산
                 if (solarResult.firstSum >= 22) {
                     displayCardInfo('soulCardInfo', solarResult.firstSum - 22);
                 } else {
                     displayCardInfo('soulCardInfo', null);
                 }
-        
-                loadingContainer.textContent = '';
-        
+                document.getElementById('errorContainer').textContent = '';
+
             } catch (error) {
                 console.error('Error in calculateCards:', error);
-                document.getElementById('errorContainer').textContent = 
-                    '날짜 변환이 실패하더라도 입력하신 날짜로 계산을 진행합니다.';
-                loadingContainer.textContent = '';
+                document.getElementById('errorContainer').textContent = error.message;
                 clearDisplays();
             }
+        }
+
+
+        function validateInputs() {
+            if (!yearSelect.value || !monthSelect.value || !daySelect.value) {
+                document.getElementById('errorContainer').textContent = '년, 월, 일을 모두 선택해주세요.';
+                return false;
+            }
+            return true;
+        }
+
+
+        function calculateBirthNumber(number) {
+            // 생년월일 합계의 각 자리수를 더한 첫 번째 결과
+            const firstSum = String(number).split('').map(Number).reduce((a, b) => a + b, 0);
+            
+            // 21을 초과하는 경우에만 한번 더 각 자리수를 더함
+            if (firstSum > 21) {
+                const finalSum = String(firstSum).split('').map(Number).reduce((a, b) => a + b, 0);
+                return {
+                    firstSum: firstSum,  // 소울 카드 계산용
+                    finalSum: finalSum   // 최종 카드 번호
+                };
+            }
+            
+            return {
+                firstSum: firstSum,
+                finalSum: firstSum
+            };
+        }
+
+
+        function displayCardInfo(elementId, cardNumber) {
+            const cardInfoDiv = document.getElementById(elementId);
+            
+            // 소울 카드이고 숫자가 21 이하인 경우
+            if (elementId === 'soulCardInfo' && cardNumber <= 21) {
+                cardInfoDiv.innerHTML = `
+                    <div class="card-name">해당 없음</div>
+                    <div class="card-meaning">양력 숫자가 21 이하일 경우 소울 카드는 없습니다.</div>
+                `;
+                return;
+            }
+            
+            const card = tarotCards[(cardNumber - 1 + tarotCards.length) % tarotCards.length];
+            cardInfoDiv.innerHTML = `
+                <div class="card-name">${card.number}. ${card.name}</div>
+                <div class="card-meaning">${card.meaning}</div>
+            `;
         }
 
         function clearDisplays() {
@@ -591,94 +859,20 @@
             document.getElementById('soulCardInfo').innerHTML = '';
         }
 
+        yearSelect.addEventListener('change', updateDays);
+        monthSelect.addEventListener('change', updateDays);
+
         // 이벤트 리스너 등록
         document.querySelectorAll('input[name="calendarType"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const isLunar = e.target.value === 'lunar';
-                leapMonthContainer.style.display = isLunar ? 'inline' : 'none';
-                if (!isLunar) {
-                    isLeapMonthCheckbox.checked = false;
-                }
-                calculateCards();
-            });
+            radio.addEventListener('change', calculateCards);
         });
-
-        isLeapMonthCheckbox.addEventListener('change', calculateCards);
-        yearSelect.addEventListener('change', () => {
-            updateDays();
-            calculateCards();
-        });
-        monthSelect.addEventListener('change', () => {
-            updateDays();
-            calculateCards();
-        });
+        yearSelect.addEventListener('change', calculateCards);
+        monthSelect.addEventListener('change', calculateCards);
         daySelect.addEventListener('change', calculateCards);
 
         // 초기화
         initializeDateSelects();
-         // 생년월일 숫자 계산 함수// 생년월일 숫자 계산 함수
-        function calculateBirthNumber(initialSum) {
-            // 각 자릿수를 더하는 함수
-            function sumDigits(num) {
-                return String(num).split('').reduce((sum, digit) => sum + parseInt(digit), 0);
-            }
-        
-            // 첫 번째 합계 계산
-            let firstSum = sumDigits(initialSum);
-            
-            // 두 번째 합계 계산 (최종 결과)
-            let finalSum = firstSum;
-            while (finalSum > 22) {
-                finalSum = sumDigits(finalSum);
-            }
-        
-            // 0이 나오면 22(바보)로 변경
-            if (finalSum === 0) {
-                finalSum = 22;
-            }
-        
-            return {
-                firstSum: firstSum,
-                finalSum: finalSum
-            };
-        }
-        
-        // 카드 정보 표시 함수
-        function displayCardInfo(elementId, cardNumber) {
-            const container = document.getElementById(elementId);
-            container.innerHTML = '';
-        
-            if (cardNumber === null) {
-                container.innerHTML = '<div class="card-meaning">해당없음</div>';
-                return;
-            }
-        
-            // 음수 처리 (섀도우 카드용)
-            if (cardNumber < 0) {
-                cardNumber = Math.abs(cardNumber);
-            }
-        
-            // 카드 번호가 22인 경우 0번(바보) 카드로 처리
-            const actualNumber = cardNumber === 22 ? 0 : cardNumber;
-            
-            // 카드 찾기
-            const card = tarotCards.find(card => parseInt(card.number) === actualNumber);
-            
-            if (!card) {
-                container.innerHTML = '<div class="card-meaning">유효하지 않은 카드 번호입니다.</div>';
-                return;
-            }
-        
-            // 카드 정보 표시
-            container.innerHTML = `
-                <div class="card-name">${card.name} (${actualNumber})</div>
-                <div class="card-meaning">${card.meaning}</div>
-            `;
-        }
-        // 초기 상태 설정
-        document.addEventListener('DOMContentLoaded', () => {
-            leapMonthContainer.style.display = 'none';
-            clearDisplays();
-        });
+        calculateCards();
     </script>
 </body>
+</html>
