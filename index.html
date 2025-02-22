@@ -167,24 +167,46 @@
             gap: 10px;
         }
 
-        .share-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
-            background-color: var(--primary-color);
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .share-btn:hover {
-            background-color: #357abd;
-        }
-
+	/* 이 부분을 아래 새로운 스타일로 교체 */
+	.share-btn {
+	    padding: 10px 20px;
+	    border: none;
+	    border-radius: 20px;
+	    background-color: var(--primary-color);  /* 기본 버튼 색상 (주소복사, 링크공유) */
+	    color: white;
+	    cursor: pointer;
+	    font-size: 14px;
+	    transition: background-color 0.3s;
+	    display: flex;
+	    align-items: center;
+	    gap: 8px;
+	}
+	
+	/* 그리고 이 새로운 스타일들을 추가 */
+	.share-btn.copy-result {
+	    background-color: #40c057;  /* 녹색 계열 */
+	}
+	.share-btn.copy-result:hover {
+	    background-color: #40c057;
+	}
+	
+	.share-btn.save-result {
+	    background-color: #40c057;
+	}
+	.share-btn.save-result:hover {
+	    background-color: #40c057;
+	}
+	
+	.share-btn.share-result {
+	    background-color: #40c057;
+	}
+	.share-btn.share-result:hover {
+	    background-color: #40c057;
+	}
+	
+	.share-btn:hover {
+	    background-color: #357abd;
+	}
         .copyright {
             color: #666;
             font-size: 12px;
