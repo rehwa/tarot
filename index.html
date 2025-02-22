@@ -966,7 +966,9 @@
 	// 결과 복사 함수
 	function copyResult() {
 	    const cardResults = document.querySelector('.card-result');
-	    const text = Array.from(cardResults.querySelectorAll('.card')).map(card => {
+	    const solarDate = document.getElementById('solarDate').textContent;
+	    const lunarDate = document.getElementById('lunarDate').textContent;
+	    const text = `${solarDate}\n${lunarDate}\n\n` + Array.from(cardResults.querySelectorAll('.card')).map(card => {
 	        const title = card.querySelector('h3').textContent;
 	        const info = card.querySelector('.card-info').textContent;
 	        return `${title}\n${info}`;
@@ -980,7 +982,6 @@
 	        }, 2000);
 	    });
 	}
-	
 	// 이미지 저장 함수
 	function saveImage() {
 	    const element = document.querySelector('.card-result');
@@ -997,10 +998,12 @@
 	        }, 2000);
 	    });
 	}
-		// 결과 공유 함수
+	// 결과 공유 함수
 	async function shareResult() {
 	    const cardResults = document.querySelector('.card-result');
-	    const text = Array.from(cardResults.querySelectorAll('.card')).map(card => {
+	    const solarDate = document.getElementById('solarDate').textContent;
+	    const lunarDate = document.getElementById('lunarDate').textContent;
+	    const text = `${solarDate}\n${lunarDate}\n\n` + Array.from(cardResults.querySelectorAll('.card')).map(card => {
 	        const title = card.querySelector('h3').textContent;
 	        const info = card.querySelector('.card-info').textContent;
 	        return `${title}\n${info}`;
