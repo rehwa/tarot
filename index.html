@@ -997,8 +997,7 @@
 	        }, 2000);
 	    });
 	}
-	
-	// 결과 공유 함수
+		// 결과 공유 함수
 	async function shareResult() {
 	    const cardResults = document.querySelector('.card-result');
 	    const text = Array.from(cardResults.querySelectorAll('.card')).map(card => {
@@ -1008,20 +1007,58 @@
 	    }).join('\n\n');
 	
 	    try {
+	        const canvas = await html2canvas(cardResults);
+	        canvas.toBlob(async (blob) => {
+	            const files = [new File([blob], 'tarot-reading.png', { type: 'image/png' })];
+	            
+	            if (navigator.share) {
+	                try {
+	                    await navigator.share({
+	                        text: text,
+	                        files: files
+	                    });
+	                    const btn = document.getElementById('shareBtn');
+	                    btn.innerHTML = '공유 완료!';
+	                    setTimeout(() => {
+	                        btn.innerHTML = '<span>결과 공유</span>';
+	                    }, 2000);
+	                } catch (error) {
+	                    // 이미지 공유가 실패하면 텍스트만 공유 시도
+	                    try {
+	                        await navigator.share({
+	                            text: text
+	                        });
+	                        const btn = document.getElementById('shareBtn');
+	                        btn.innerHTML = '공유 완료!';
+	                        setTimeout(() => {
+	                            btn.innerHTML = '<span>결과 공유</span>';
+	                        }, 2000);
+	                    } catch (error) {
+	                        copyResult();
+	                    }
+	                }
+	            } else {
+	                copyResult();
+	            }
+	        });
+	    } catch (error) {
+	        // html2canvas 실패 시 텍스트만 공유
 	        if (navigator.share) {
-	            await navigator.share({
-	                text: text
-	            });
-	            const btn = document.getElementById('shareBtn');
-	            btn.innerHTML = '공유 완료!';
-	            setTimeout(() => {
-	                btn.innerHTML = '<span>결과 공유</span>';
-	            }, 2000);
+	            try {
+	                await navigator.share({
+	                    text: text
+	                });
+	                const btn = document.getElementById('shareBtn');
+	                btn.innerHTML = '공유 완료!';
+	                setTimeout(() => {
+	                    btn.innerHTML = '<span>결과 공유</span>';
+	                }, 2000);
+	            } catch (error) {
+	                copyResult();
+	            }
 	        } else {
 	            copyResult();
 	        }
-	    } catch (error) {
-	        copyResult();
 	    }
 	}
 	
