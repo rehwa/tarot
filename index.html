@@ -957,7 +957,7 @@
             const cardInfoDiv = document.getElementById(elementId);
             
             // 소울 카드이고 숫자가 21 이하인 경우
-            if (elementId === 'soulCardInfo' && cardNumber <= 21) {
+            if (elementId === 'soulCardInfo' && cardNumber <= null) {
                 cardInfoDiv.innerHTML = `
                     <div class="card-name">N/A</div>
                     <div class="card-meaning">해당 없음</div>
