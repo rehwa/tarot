@@ -4,7 +4,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarot Birth-Card Reading</title>
+    <title>Tarot BCR</title>
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -23,7 +23,13 @@
             background-color: var(--secondary-color);
             color: var(--text-color);
         }
-
+	.subtitle {
+	    text-align: center;
+	    color: #666;
+	    font-size: 16px;
+	    margin-top: -15px;
+	    margin-bottom: 20px;
+	}
         .container {
             background-color: white;
             padding: 20px;
@@ -215,7 +221,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Tarot Birth-Card Reading</h1>
+        <h1>Tarot Birth Cards Reading</h1>
+	<p class="subtitle">Understanding Essence: The Meaning within Tarot Birth Cards</p>
         <div id="errorContainer" class="error-message" role="alert"></div>
 
         <div class="input-group">
