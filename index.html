@@ -1166,23 +1166,47 @@
 	        }
 	    }
 	}	
-	// 페이지 로드 시 모바일 체크
-	window.addEventListener('load', function() {
-	    const shareBtn = document.getElementById('shareBtn');
-	    if (!navigator.share || !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
-	        shareBtn.style.display = 'none';
-	    }
-        
-            // 이미지 로드 오류 처리
-            document.querySelectorAll('.card-image').forEach(img => {
-                img.onerror = function() {
-                    this.src = 'tarot-default.png'; // 기본 이미지
-                    if(this.src.includes('tarot-default.png')) {
-                        this.style.display = 'none'; // 기본 이미지도 없으면 숨김
-                    }
-                };
-            });
-	});
+	// 페이지 로드 시 모바일 체크 및 이벤트 리스너 설정
+window.addEventListener('load', function() {
+    // 공유 버튼 표시 여부 설정
+    const shareBtn = document.getElementById('shareBtn');
+    if (!navigator.share || !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
+        shareBtn.style.display = 'none';
+    }
+    
+    // 이미지 로드 오류 처리
+    document.querySelectorAll('.card-image').forEach(img => {
+        img.onerror = function() {
+            this.src = 'tarot-default.png'; // 기본 이미지
+            if(this.src.includes('tarot-default.png')) {
+                this.style.display = 'none'; // 기본 이미지도 없으면 숨김
+            }
+        };
+    });
+    
+    // 날짜 선택 요소에 이벤트 리스너 다시 추가
+    document.getElementById('year').addEventListener('change', function() {
+        updateDays();
+        calculateCards();
+    });
+    document.getElementById('month').addEventListener('change', function() {
+        updateDays();
+        calculateCards();
+    });
+    document.getElementById('day').addEventListener('change', calculateCards);
+    
+    // 양력/음력 라디오 버튼에 이벤트 리스너 추가
+    document.querySelectorAll('input[name="calendarType"]').forEach(radio => {
+        radio.addEventListener('change', calculateCards);
+    });
+    
+    // 초기 계산 실행 (이미 선택된 날짜가 있는 경우)
+    if (document.getElementById('year').value && 
+        document.getElementById('month').value && 
+        document.getElementById('day').value) {
+        calculateCards();
+    }
+});
     </script>
 </body>
 </html>
