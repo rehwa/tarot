@@ -1028,7 +1028,7 @@
             
             // 이미지 경로 설정 (카드 번호에 맞게)
             const cardNum = card.number;
-            cardImage.src = `tarot-${cardNum}.jpg`; // 이미지 파일 확장자에 맞게 수정
+            cardImage.src = `tarot-${cardNum}.png`; // 이미지 파일 확장자에 맞게 수정
             cardImage.alt = card.name;
             cardImage.style.display = 'block';
             
@@ -1057,8 +1057,8 @@
         // 이미지 로드 오류 처리
         document.querySelectorAll('.card-image').forEach(img => {
             img.onerror = function() {
-                this.src = 'tarot-default.jpg'; // 기본 이미지
-                if(this.src.includes('tarot-default.jpg')) {
+                this.src = 'tarot-default.png'; // 기본 이미지
+                if(this.src.includes('tarot-default.png')) {
                     this.style.display = 'none'; // 기본 이미지도 없으면 숨김
                 }
             };
@@ -1176,8 +1176,8 @@
             // 이미지 로드 오류 처리
             document.querySelectorAll('.card-image').forEach(img => {
                 img.onerror = function() {
-                    this.src = 'tarot-default.jpg'; // 기본 이미지
-                    if(this.src.includes('tarot-default.jpg')) {
+                    this.src = 'tarot-default.png'; // 기본 이미지
+                    if(this.src.includes('tarot-default.png')) {
                         this.style.display = 'none'; // 기본 이미지도 없으면 숨김
                     }
                 };
