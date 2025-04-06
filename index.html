@@ -1,1110 +1,176 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarot BCR</title>
-    <style>
-        :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #f5f5f5;
-            --text-color: #333;
-            --border-color: #dee2e6;
-            --error-color: #dc3545;
-            --success-color: #28a745;
-        }
+<!-- 1. 카드 스타일 수정 부분: CSS 수정 -->
+<style>
+    /* 기존 스타일은 그대로 유지하고 아래 스타일만 추가/수정합니다 */
+    .card {
+        background-color: var(--secondary-color);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 15px;
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-        }
-	.subtitle {
-	    text-align: center;
-	    color: #999;
-	    font-size: 14px;
-	    margin-top: -15px;
-	    margin-bottom: 20px;
-            font-weight: bold;
-	}
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+    .card h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 10px;
+        font-size: 18px;
+    }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+    .card-content {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 15px;
+    }
 
-        .input-group {
-            margin-bottom: 25px;
-        }
+    .card-image {
+        width: 120px;
+        height: 200px;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
 
-        .radio-group {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
+    .card-text {
+        flex: 1;
+    }
 
-        .radio-group label {
-            display: flex;
+    .date-display {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .card-name {
+        color: var(--primary-color);
+        font-weight: bold;
+        margin: 8px 0;
+        font-size: 16px;
+    }
+
+    .card-meaning {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 8px 0;
+    }
+
+    @media (max-width: 767px) {
+        .card-content {
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
-            font-size: 16px;
-            padding: 8px 16px;
-            background-color: var(--secondary-color);
-            border-radius: 20px;
-            cursor: pointer;
         }
-
-        .radio-group input[type="radio"] {
-            width: 20px;
-            height: 20px;
+        
+        .card-image {
+            width: 100px;
+            height: 166px;
+            margin-bottom: 10px;
         }
+    }
+</style>
 
-        .date-inputs {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        select {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            background-color: white;
-            -webkit-appearance: auto;
-            appearance: auto;  
-            height: 48px;
-            cursor: pointer;
-        }
-
-        select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
-        }
-
-        .card-result {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .card {
-            background-color: var(--secondary-color);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .card h3 {
-            margin-top: 0;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .date-display {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .card-name {
-            color: var(--primary-color);
-            font-weight: bold;
-            margin: 8px 0;
-            font-size: 16px;
-        }
-
-        .card-meaning {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.5;
-            margin: 8px 0;
-        }
-
-        .error-message {
-            color: var(--error-color);
-            font-size: 14px;
-            text-align: center;
-            margin: 10px 0;
-            padding: 10px;
-            background-color: rgba(220, 53, 69, 0.1);
-            border-radius: 8px;
-            display: none;
-        }
-
-        .error-message:not(:empty) {
-            display: block;
-        }
-
-	@media (min-width: 768px) {
-            .card-result {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* Footer 스타일 추가 */
-        .footer {
-            margin-top: 40px;
-            padding: 20px;
-            text-align: center;
-            border-top: 1px solid var(--border-color);
-	    font-weight: bold;
-        }
-
-        .share-buttons {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-	/* 이 부분을 아래 새로운 스타일로 교체 */
-	.share-btn {
-	    padding: 10px 20px;
-	    border: none;
-	    border-radius: 20px;
-	    background-color: var(--primary-color);  /* 기본 버튼 색상 (주소복사, 링크공유) */
-	    color: white;
-	    cursor: pointer;
-	    font-size: 14px;
-	    transition: background-color 0.3s;
-	    display: flex;
-	    align-items: center;
-	    gap: 8px;
-	}
-	
-	/* 그리고 이 새로운 스타일들을 추가 */
-	.share-btn.copy-result {
-	    background-color: #40c057 !important;  /* 녹색 계열 */
-	}
-	.share-btn.copy-result:hover {
-	    background-color: #40c057 !important;
-	}
-	
-	.share-btn.save-result {
-	    background-color: #40c057 !important;
-	}
-	.share-btn.save-result:hover {
-	    background-color: #40c057 !important;
-	}
-	
-	.share-btn.share-result {
-	    background-color: #40c057 !important;
-	}
-	.share-btn.share-result:hover {
-	    background-color: #40c057 !important;
-	}
-	
-	.share-btn:hover {
-	    background-color: #357abd;
-	}
-        .copyright {
-            color: #666;
-            font-size: 12px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Tarot Birth Cards Reading</h1>
-	<p class="subtitle">Understanding Essence:<br>The Meaning within Tarot Birth Cards</p>
-        <div id="errorContainer" class="error-message" role="alert"></div>
-
-        <div class="input-group">
-            <div class="radio-group">
-                <label>
-                    <input type="radio" name="calendarType" value="solar" checked>
-                    양력
-                </label>
-                <label>
-                    <input type="radio" name="calendarType" value="lunar">
-                    음력
-                </label>
-            </div>
-
-            <div class="date-inputs">
-    		<select id="year" aria-label="년도 선택">
-    			<option value="" selected disabled>년도 선택</option>
-		</select>
-		<select id="month" aria-label="월 선택">
-    			<option value="" selected disabled>월 선택</option>
-		</select>
-		<select id="day" aria-label="일 선택">
-    			<option value="" selected disabled>일 선택</option>
-		</select>
-            </div>
-        </div>
-
-        <div class="card-result">
-            <div class="card">
-                <h3>양력(SOLAR) 카드</h3>
-                <div class="date-display" id="solarDate">양력: -</div>
+<!-- 2. HTML 구조 변경: 카드 표시 부분 수정 -->
+<div class="card-result">
+    <div class="card">
+        <h3>양력(SOLAR) 카드</h3>
+        <div class="date-display" id="solarDate">양력: -</div>
+        <div class="card-content">
+            <img src="" alt="Solar Card" class="card-image" id="solarCardImage" style="display: none;">
+            <div class="card-text">
                 <div id="solarCardInfo" class="card-info"></div>
-            </div>
-            <div class="card">
-                <h3>음력(LUNAR) 카드</h3>
-                <div class="date-display" id="lunarDate">음력: -</div>
-                <div id="lunarCardInfo" class="card-info"></div>
-            </div>
-            <div class="card">
-                <h3>그림자(SHADOW) 카드</h3>
-                <div id="shadowCardInfo" class="card-info"></div>
-            </div>
-            <div class="card">
-                <h3>소울(SOUL) 카드</h3>
-                <div id="soulCardInfo" class="card-info"></div>
-            </div>
-        </div>
-	            <!-- 여기에 새로운 footer 추가 -->
-        <div class="footer">
-            <div class="share-buttons">
-                <button onclick="copyUrl()" class="share-btn">
-                    <span>주소 복사</span>
-                </button>
-                <button onclick="shareUrl()" class="share-btn">
-	            <span>링크 공유</span>
-                </button>
-	        <button onclick="copyResult()" class="share-btn copy-result" id="copyBtn">
-	            <span>결과 복사</span>
-	        </button>
-	        <button onclick="saveImage()" class="share-btn save-result" id="saveBtn">
-	            <span>결과 저장</span>
-	        </button>
-	        <button onclick="shareResult()" class="share-btn share-result" id="shareBtn">
-	            <span>결과 공유</span>	
-                </button>
-            </div>
-            <div class="copyright">
-                LENA Academy & Curated by REHWA, in the JWF<br>
-		© 2025 JWF. All rights reserved.
             </div>
         </div>
     </div>
+    <div class="card">
+        <h3>음력(LUNAR) 카드</h3>
+        <div class="date-display" id="lunarDate">음력: -</div>
+        <div class="card-content">
+            <img src="" alt="Lunar Card" class="card-image" id="lunarCardImage" style="display: none;">
+            <div class="card-text">
+                <div id="lunarCardInfo" class="card-info"></div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>그림자(SHADOW) 카드</h3>
+        <div class="card-content">
+            <img src="" alt="Shadow Card" class="card-image" id="shadowCardImage" style="display: none;">
+            <div class="card-text">
+                <div id="shadowCardInfo" class="card-info"></div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>소울(SOUL) 카드</h3>
+        <div class="card-content">
+            <img src="" alt="Soul Card" class="card-image" id="soulCardImage" style="display: none;">
+            <div class="card-text">
+                <div id="soulCardInfo" class="card-info"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script>
-        const yearSelect = document.getElementById('year');
-        const monthSelect = document.getElementById('month');
-        const daySelect = document.getElementById('day');
-        // 음력 달력 배열 상수 정의
-        const currentYear = new Date().getFullYear();
-        const LUNAR_LAST_YEAR = 1939;
-        const lunarMonthTable = [
-            [2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 2],   /* 양력 1940년 1월은 음력 1939년에 있음 그래서 시작년도는 1939년*/
-            [2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1],
-            [2, 2, 1, 2, 2, 4, 1, 1, 2, 1, 2, 1],   /* 1941 */
-            [2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 1, 2],
-            [1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1, 2],
-            [1, 1, 2, 4, 1, 2, 1, 2, 2, 1, 2, 2],
-            [1, 1, 2, 1, 1, 2, 1, 2, 2, 2, 1, 2],
-            [2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2],
-            [2, 5, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2],
-            [2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2],
-            [2, 2, 1, 2, 1, 2, 3, 2, 1, 2, 1, 2],
-            [2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 1],
-            [2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2],   /* 1951 */
-            [1, 2, 1, 2, 4, 2, 1, 2, 1, 2, 1, 2],
-            [1, 2, 1, 1, 2, 2, 1, 2, 2, 1, 2, 2],
-            [1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2],
-            [2, 1, 4, 1, 1, 2, 1, 2, 1, 2, 2, 2],
-            [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2],
-            [2, 1, 2, 1, 2, 1, 1, 5, 2, 1, 2, 2],
-            [1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2],
-            [1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
-            [2, 1, 2, 1, 2, 5, 2, 1, 2, 1, 2, 1],
-            [2, 1, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2],   /* 1961 */
-            [1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1],
-            [2, 1, 2, 3, 2, 1, 2, 1, 2, 2, 2, 1],
-            [2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 2],
-            [1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 2],
-            [1, 2, 5, 2, 1, 1, 2, 1, 1, 2, 2, 1],
-            [2, 2, 1, 2, 2, 1, 1, 2, 1, 2, 1, 2],
-            [1, 2, 2, 1, 2, 1, 5, 2, 1, 2, 1, 2],
-            [1, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1],
-            [2, 1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2],
-            [1, 2, 1, 1, 5, 2, 1, 2, 2, 2, 1, 2],   /* 1971 */
-            [1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
-            [2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 2, 1],
-            [2, 2, 1, 5, 1, 2, 1, 1, 2, 2, 1, 2],
-            [2, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2],
-            [2, 2, 1, 2, 1, 2, 1, 5, 2, 1, 1, 2],
-            [2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 1],
-            [2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1],
-            [2, 1, 1, 2, 1, 6, 1, 2, 2, 1, 2, 1],
-            [2, 1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2],
-            [1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 2, 2],   /* 1981 */
-            [2, 1, 2, 3, 2, 1, 1, 2, 2, 1, 2, 2],
-            [2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2],
-            [2, 1, 2, 2, 1, 1, 2, 1, 1, 5, 2, 2],
-            [1, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2],
-            [1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1],
-            [2, 1, 2, 2, 1, 5, 2, 2, 1, 2, 1, 2],
-            [1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1],
-            [2, 1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2],
-            [1, 2, 1, 1, 5, 1, 2, 1, 2, 2, 2, 2],
-            [1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 2],   /* 1991 */
-            [1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2],
-            [1, 2, 5, 2, 1, 2, 1, 1, 2, 1, 2, 1],
-            [2, 2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2],
-            [1, 2, 2, 1, 2, 2, 1, 5, 2, 1, 1, 2],
-            [1, 2, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2],
-            [1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1],
-            [2, 1, 1, 2, 3, 2, 2, 1, 2, 2, 2, 1],
-            [2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 2, 1],
-            [2, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 1],
-            [2, 2, 2, 3, 2, 1, 1, 2, 1, 2, 1, 2],   /* 2001 */
-            [2, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1],
-            [2, 2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2],
-            [1, 5, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2],
-            [1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1, 1],
-            [2, 1, 2, 1, 2, 1, 5, 2, 2, 1, 2, 2],
-            [1, 1, 2, 1, 1, 2, 1, 2, 2, 2, 1, 2],
-            [2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2],
-            [2, 2, 1, 1, 5, 1, 2, 1, 2, 1, 2, 2],
-            [2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2],
-            [2, 1, 2, 2, 1, 2, 1, 1, 2, 1, 2, 1],   /* 2011 */
-            [2, 1, 6, 2, 1, 2, 1, 1, 2, 1, 2, 1],
-            [2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2],
-            [1, 2, 1, 2, 1, 2, 1, 2, 5, 2, 1, 2],
-            [1, 2, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1],
-            [2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2],
-            [2, 1, 1, 2, 3, 2, 1, 2, 1, 2, 2, 2],
-            [1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2],
-            [2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2],
-            [2, 1, 2, 5, 2, 1, 1, 2, 1, 2, 1, 2],
-            [1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],   /* 2021 */
-            [2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2],
-            [1, 5, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2],
-            [1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1],
-            [2, 1, 2, 1, 1, 5, 2, 1, 2, 2, 2, 1],
-            [2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 2],
-            [1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 2],
-            [1, 2, 2, 1, 5, 1, 2, 1, 1, 2, 2, 1],
-            [2, 2, 1, 2, 2, 1, 1, 2, 1, 1, 2, 2],
-            [1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1],
-            [2, 1, 5, 2, 1, 2, 2, 1, 2, 1, 2, 1],   /* 2031 */
-            [2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1, 2],
-            [1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 5, 2],
-            [1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1],
-            [2, 1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 2],
-            [2, 2, 1, 2, 1, 4, 1, 1, 2, 2, 1, 2],
-            [2, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2],
-            [2, 2, 1, 2, 1, 2, 1, 2, 1, 1, 2, 1],
-            [2, 2, 1, 2, 5, 2, 1, 2, 1, 2, 1, 1],
-            [2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 1],
-            [2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1, 2],   /* 2041 */
-            [1, 5, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2],
-            [1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 2, 2]
-        ];
-
-        const leapMonthData = {
-            1900: { month: 8 }, 1903: { month: 5 }, 1906: { month: 4 },
-            1909: { month: 2 }, 1911: { month: 6 }, 1914: { month: 5 },
-            1917: { month: 2 }, 1919: { month: 7 }, 1922: { month: 5 },
-            1925: { month: 4 }, 1928: { month: 2 }, 1930: { month: 6 },
-            1933: { month: 5 }, 1936: { month: 3 }, 1938: { month: 7 },
-            1941: { month: 6 }, 1944: { month: 4 }, 1947: { month: 2 },
-            1949: { month: 7 }, 1952: { month: 5 }, 1955: { month: 3 },
-            1957: { month: 8 }, 1960: { month: 8 }, 1963: { month: 4 },
-            1966: { month: 3 }, 1968: { month: 7 }, 1971: { month: 5 },
-            1974: { month: 4 }, 1976: { month: 8 }, 1979: { month: 6 },
-            // 연도별 윤달 월 정보 추가
-            1982: { month: 4 }, 1984: { month: 10 }, 1987: { month: 6 },
-            1990: { month: 5 }, 1993: { month: 3 }, 1995: { month: 8 },
-            1998: { month: 5 }, 2001: { month: 4 }, 2004: { month: 2 },
-            2006: { month: 7 }, 2009: { month: 5 }, 2012: { month: 3 },
-            2014: { month: 9 }, 2017: { month: 5 }, 2020: { month: 4 },
-            2023: { month: 2 }, 2025: { month: 6 }, 2028: { month: 5 },
-            2031: { month: 3 }, 2033: { month: 11 }, 2036: { month: 6 },
-            2039: { month: 5 }, 2042: { month: 2 }, 2044: { month: 7 },
-            2047: { month: 5 }, 2050: { month: 3 }
-        };
-
-        // 타로 카드 정보
-        const tarotCards = [
-            {
-                name: "마법사(The Magician)",
-                number: "1",
-                meaning: "창조성, 의지력, 새로운 시작, 재능과 능력의 발현. 적극적이고 진취적인 성격, 독창성과 창의력이 뛰어납니다."
-            },
-            {
-                name: "여사제(The High Priestess)",
-                number: "2",
-                meaning: "직관, 신비, 내면의 지혜, 깊은 통찰력. 영적 감수성이 풍부하며, 비밀을 잘 지키는 신중한 성격, 학문과 연구에 재능이 있습니다."
-            },
-            {
-                name: "여왕(The Empress)",
-                number: "3",
-                meaning: "풍요, 창조, 모성, 예술적 감각. 따뜻한 보살핌과 포용력을 지니며, 자연과의 조화를 중시합니다."
-            },
-            {
-                name: "황제(The Emperor)",
-                number: "4",
-                meaning: "권위, 안정, 성취, 강한 리더십. 논리적이고 실용적인 성격, 목표 지향적이며 책임감이 강합니다."
-            },
-            {
-                name: "교황(The Hierophant)",
-                number: "5",
-                meaning: "전통, 가르침, 신념, 도덕적 가치관. 지식 전달과 교육에 재능이 있으며, 영적 지도자의 기질을 가집니다."
-            },
-            {
-                name: "연인들(The Lovers)",
-                number: "6",
-                meaning: "선택, 사랑, 조화, 균형. 인간관계가 원만하고 친화력이 좋으며, 심미적 감각이 뛰어나고 균형 잡힌 판단력을 지닙니다."
-            },
-            {
-                name: "전차(The Chariot)",
-                number: "7",
-                meaning: "승리, 진보, 의지, 강한 추진력. 목표를 향한 끈기와 인내, 자기통제력이 뛰어납니다."
-            },
-            {
-                name: "힘(Strength)",
-                number: "8",
-                meaning: "용기, 인내, 내적 힘, 강인한 정신력. 온화하면서도 단호한 성격, 감정 조절능력이 뛰어납니다."
-            },
-            {
-                name: "은둔자(The Hermit)",
-                number: "9",
-                meaning: "성찰, 지혜, 고독, 깊은 통찰력. 독립적이고 자족적인 성격, 영적 깨달음을 추구합니다."
-            },
-            {
-                name: "운명의 수레바퀴(Wheel of Fortune)",
-                number: "10",
-                meaning: "변화, 기회, 순환, 적응력. 융통성이 뛰어나며, 행운을 잘 활용하고 변화를 긍정적으로 받아들입니다."
-            },
-            {
-                name: "정의(Justice)",
-                number: "11",
-                meaning: "정의, 균형, 진실, 공정성. 객관적인 판단력을 지니며, 도덕성과 윤리의식이 강하고 조화와 균형을 추구합니다."
-            },
-            {
-                name: "매달린 사람(The Hanged Man)",
-                number: "12",
-                meaning: "희생, 깨달음, 인내, 새로운 관점. 자기희생과 봉사정신이 강하며, 역경을 통한 성장을 이룹니다."
-            },
-            {
-                name: "죽음(Death)",
-                number: "13",
-                meaning: "변화, 끝과 시작, 재생, 과감한 결단력. 개혁정신이 강하며, 변화를 두려워하지 않고 새로운 시작을 위한 정화를 추구합니다."
-            },
-            {
-                name: "절제(Temperance)",
-                number: "14",
-                meaning: "조화, 중용, 치유, 균형. 균형 잡힌 성격과 중재능력을 지니며, 치유와 회복의 재능이 있고 조화로운 통합을 추구합니다."
-            },
-            {
-                name: "악마(The Devil)",
-                number: "15",
-                meaning: "욕망, 집착, 속박, 강한 개성. 물질적 성공에 대한 야망이 있으며, 자유와 해방을 추구합니다."
-            },
-            {
-                name: "흔들리는 탑(The Tower)",
-                number: "16",
-                meaning: "파괴, 해방, 각성, 혁신. 파격적인 성격을 지니며, 급진적 변화를 추구하고 과감한 도전정신을 가집니다."
-            },
-            {
-                name: "별(The Star)",
-                number: "17",
-                meaning: "희망, 영감, 치유, 낙관성. 이상적인 성격을 지니며, 예술적 영감과 창조성, 미래에 대한 비전을 가집니다."
-            },
-            {
-                name: "달(The Moon)",
-                number: "18",
-                meaning: "직관, 환상, 감수성, 신비. 예민하고 섬세한 감성을 지니며, 풍부한 상상력과 창의성, 신비로운 매력을 가집니다."
-            },
-            {
-                name: "태양(The Sun)",
-                number: "19",
-                meaning: "성공, 활력, 행복, 긍정성. 밝고 긍정적인 성격을 지니며, 타고난 리더십과 성공과 번영의 기운을 가집니다."
-            },
-            {
-                name: "심판, 부활(Judgement)",
-                number: "20",
-                meaning: "부활, 각성, 소명, 혁신. 높은 사명감과 책임감을 지니며, 자기혁신의 능력과 영적 깨달음을 추구합니다."
-            },
-            {
-                name: "세계(The World)",
-                number: "21",
-                meaning: "완성, 통합, 성취, 포용력. 세계적인 시야와 통찰력을 지니며, 궁극적 목표 달성을 추구합니다."
-            },
-            {
-                name: "바보(The Fool)",
-                number: "0",
-                meaning: "순수, 모험, 자유, 무한한 가능성. 자유분방하고 창의적인 성격, 새로운 도전을 즐기는 특성을 가집니다."
-            }
-        ];
-
-        // myDate 객체 정의
-        function myDate(year, month, day, leapMonth) {
-            this.year = year;
-            this.month = month;
-            this.day = day;
-            this.leapMonth = leapMonth;
-        }
-
-        function lunarCalc(year, month, day, type, leapmonth) {
-            var solYear, solMonth, solDay;
-            var lunYear, lunMonth, lunDay;
-
-            // lunLeapMonth는 음력의 윤달인지 아닌지를 확인하기위한 변수
-            // 1일 경우 윤달이고 0일 경우 음달
-            var lunLeapMonth, lunMonthDay;
-            var i, lunIndex;
-
-            var solMonthDay = [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-            /* range check */
-            if (year < 1940 || year > 2025) {
-                throw new Error('1940년부터 2040년까지만 지원합니다');
-            }
-
-            /* 속도 개선을 위해 기준 일자를 여러개로 한다 */
-            if (year >= 2000) {
-                /* 기준일자 양력 2000년 1월 1일 (음력 1999년 11월 25일) */
-                solYear = 2000;
-                solMonth = 1;
-                solDay = 1;
-                lunYear = 1999;
-                lunMonth = 11;
-                lunDay = 25;
-                lunLeapMonth = 0;
-
-                solMonthDay[1] = 29;    /* 2000 년 2월 28일 */
-                lunMonthDay = 30;   /* 1999년 11월 */
-            }
-            else if (year >= 1970) {
-                /* 기준일자 양력 1970년 1월 1일 (음력 1969년 11월 24일) */
-                solYear = 1970;
-                solMonth = 1;
-                solDay = 1;
-                lunYear = 1969;
-                lunMonth = 11;
-                lunDay = 24;
-                lunLeapMonth = 0;
-
-                solMonthDay[1] = 28;    /* 1970 년 2월 28일 */
-                lunMonthDay = 30;   /* 1969년 11월 */
-            }
-            else {
-                /* 기준일자 양력 1940년 1월 1일 (음력 1939년 11월 22일) */
-                solYear = 1940;
-                solMonth = 1;
-                solDay = 1;
-                lunYear = 1939;
-                lunMonth = 11;
-                lunDay = 22;
-                lunLeapMonth = 0;
-
-                solMonthDay[1] = 29;    /* 1940 년 2월 28일 */
-                lunMonthDay = 29;   /* 1939년 11월 */
-            }
-
-            lunIndex = lunYear - LUNAR_LAST_YEAR;
-
-            // type이 1일때는 입력받은 양력 값에 대한 음력값을 반환
-            // 2일 때는 입력받은 음력 값에 대한 양력값을 반환
-            // 반복문이 돌면서 양력 값들과 음력 값들을 1일 씩 증가시키고
-            // 입력받은 날짜값과 양력 값이 일치할 때 음력값을 반환함
-            while (true) {
-                if (type == 1 &&
-                    year == solYear &&
-                    month == solMonth &&
-                    day == solDay) {
-                    return new myDate(lunYear, lunMonth, lunDay, lunLeapMonth);
-                }
-                else if (type == 2 &&
-                    year == lunYear &&
-                    month == lunMonth &&
-                    day == lunDay &&
-                    leapmonth == lunLeapMonth) {
-                    return new myDate(solYear, solMonth, solDay, 0);
-                }
-
-                // 양력의 마지막 날일 경우 년도를 증가시키고 나머지 초기화
-                if (solMonth == 12 && solDay == 31) {
-                    solYear++;
-                    solMonth = 1;
-                    solDay = 1;
-
-                    // 윤년일 시 2월달의 총 일수를 1일 증가
-                    if (solYear % 400 == 0)
-                        solMonthDay[1] = 29;
-                    else if (solYear % 100 == 0)
-                        solMonthDay[1] = 28;
-                    else if (solYear % 4 == 0)
-                        solMonthDay[1] = 29;
-                    else
-                        solMonthDay[1] = 28;
-
-                }
-                // 현재 날짜가 달의 마지막 날짜를 가리키고 있을 시 달을 증가시키고 날짜 1로 초기화
-                else if (solMonthDay[solMonth - 1] == solDay) {
-                    solMonth++;
-                    solDay = 1;
-                }
-                else
-                    solDay++;
-
-                // 음력의 마지막 날인 경우 년도를 증가시키고 달과 일수를 초기화
-                if (lunMonth == 12 &&
-                    ((lunarMonthTable[lunIndex][lunMonth - 1] == 1 && lunDay == 29) ||
-                        (lunarMonthTable[lunIndex][lunMonth - 1] == 2 && lunDay == 30))) {
-                    lunYear++;
-                    lunMonth = 1;
-                    lunDay = 1;
-
-                    if (lunYear > 2043) {
-                        alert("입력하신 달은 없습니다.");
-                        break;
-                    }
-
-                    // 년도가 바꼈으니 index값 수정
-                    lunIndex = lunYear - LUNAR_LAST_YEAR;
-
-                    // 음력의 1월에는 1 or 2만 있으므로 1과 2만 비교하면됨
-                    if (lunarMonthTable[lunIndex][lunMonth - 1] == 1)
-                        lunMonthDay = 29;
-                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 2)
-                        lunMonthDay = 30;
-                }
-                // 현재날짜가 이번달의 마지막날짜와 일치할 경우
-                else if (lunDay == lunMonthDay) {
-
-                    // 윤달인데 윤달계산을 안했을 경우 달의 숫자는 증가시키면 안됨
-                    if (lunarMonthTable[lunIndex][lunMonth - 1] >= 3
-                        && lunLeapMonth == 0) {
-                        lunDay = 1;
-                        lunLeapMonth = 1;
-                    }
-                    // 음달이거나 윤달을 계산 했을 겨우 달을 증가시키고 lunLeapMonth값 초기화
-                    else {
-                        lunMonth++;
-                        lunDay = 1;
-                        lunLeapMonth = 0;
-                    }
-
-                    // 음력의 달에 맞는 마지막날짜 초기화
-                    if (lunarMonthTable[lunIndex][lunMonth - 1] == 1)
-                        lunMonthDay = 29;
-                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 2)
-                        lunMonthDay = 30;
-                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 3)
-                        lunMonthDay = 29;
-                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 4 &&
-                        lunLeapMonth == 0)
-                        lunMonthDay = 29;
-                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 4 &&
-                        lunLeapMonth == 1)
-                        lunMonthDay = 30;
-                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 5 &&
-                        lunLeapMonth == 0)
-                        lunMonthDay = 30;
-                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 5 &&
-                        lunLeapMonth == 1)
-                        lunMonthDay = 29;
-                    else if (lunarMonthTable[lunIndex][lunMonth - 1] == 6)
-                        lunMonthDay = 30;
-                }
-                else
-                    lunDay++;
-                            // 윤달 체크 로직 추가
-            function isLeapMonth(year, month) {
-                return leapMonthData[year] && leapMonthData[year].month === month;
-            }
+<!-- 3. JavaScript 함수 수정: 이미지 표시 기능 추가 -->
+<script>
+    // displayCardInfo 함수 수정: 이미지 표시 기능 추가
+    function displayCardInfo(elementId, cardNumber) {
+        const cardInfoDiv = document.getElementById(elementId);
+        const cardImageId = elementId.replace('CardInfo', 'CardImage');
+        const cardImage = document.getElementById(cardImageId);
         
-            // lunarCalc 함수 내에서 윤달 처리 수정
-            if (type === 2) { // 음력 -> 양력 변환 시
-                if (leapmonth && !isLeapMonth(year, month)) {
-                    throw new Error('해당 월은 윤달이 아닙니다.');
-                }
-            }
-            }
-        }
-
-
-        function solarToLunar(solYear, solMonth, solDay) {
-            // 날짜 형식이 안맞을 경우 공백 반환
-            if (!solYear || solYear == 0 ||
-                !solMonth || solMonth == 0 ||
-                !solDay || solDay == 0) {
-                return "";
-            }
-
-            // 양력의 달마다의 일수
-            var solMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-            // 윤년일 시 2월에 1일 추가
-            if (solYear % 400 == 0 || (solYear % 4 == 0 && solYear % 100 != 0)) solMonthDays[1] += 1;
-
-
-            if (solMonth < 1 || solMonth > 12 ||
-                solDay < 1 || solDay > solMonthDays[solMonth - 1]) {
-
-                return "";
-            }
-
-            /* 양력/음력 변환 */
-            var date = lunarCalc(solYear, solMonth, solDay, 1);
-
-            return "음력 " + date.year + "년 " + (date.leapMonth ? "(윤)" : "") + date.month + "월 " + date.day;
-        }
-
-        // 날짜 변환 함수 수정
-        function convertDate(year, month, day, isSolar) {
-            try {
-                if (isSolar) {
-                    // 양력 -> 음력 변환
-                    const lunarDate = lunarCalc(year, month, day, 1);
-                    const isLeap = leapMonthData[lunarDate.year] && 
-                                  leapMonthData[lunarDate.year].month === lunarDate.month;
-                    
-                    return {
-                        solar: { year, month, day },
-                        lunar: {
-                            year: lunarDate.year,
-                            month: lunarDate.month,
-                            day: lunarDate.day,
-                            isLeap: isLeap
-                        }
-                    };
-                } else {
-                    // 음력 -> 양력 변환
-                    const isLeap = leapMonthData[year] && leapMonthData[year].month === month;
-                    const solarDate = lunarCalc(year, month, day, 2, isLeap ? 1 : 0);
-                    
-                    return {
-                        solar: {
-                            year: solarDate.year,
-                            month: solarDate.month,
-                            day: solarDate.day
-                        },
-                        lunar: { 
-                            year, 
-                            month, 
-                            day,
-                            isLeap: isLeap
-                        }
-                    };
-                }
-            } catch (error) {
-                console.error('날짜 변환 중 오류:', error);
-                throw new Error('날짜 변환 중 오류가 발생했습니다. 올바른 날짜를 선택해주세요.');
-            }
-        }
-
-        // 나머지 기존 함수들
-	function initializeDateSelects() {
-    	// year select
-    	const yearSelect = document.getElementById('year');
-    	yearSelect.innerHTML = '<option value="">년도</option>';
-    	// 1940년부터 2040년까지로 제한
-    	for (let y = 2025; y >= 1940; y--) {
-        	yearSelect.innerHTML += `<option value="${y}">${y}년</option>`;
-    	}
-
-    	// month select
-    	const monthSelect = document.getElementById('month');
-    	monthSelect.innerHTML = '<option value="">월</option>';
-    	for (let m = 1; m <= 12; m++) {
-        	const monthValue = m.toString().padStart(2, '0');
-        	monthSelect.innerHTML += `<option value="${monthValue}">${m}월</option>`;
-    	}
-
-    	// day select - 초기값은 31일로 설정
-    	const daySelect = document.getElementById('day');
-    	daySelect.innerHTML = '<option value="">일</option>';
-    	for (let d = 1; d <= 31; d++) {
-        	const dayValue = d.toString().padStart(2, '0');
-        	daySelect.innerHTML += `<option value="${dayValue}">${d}일</option>`;
-    	}
-}
-
-        function updateDays() {
-            const year = parseInt(yearSelect.value) || currentYear;
-            const month = parseInt(monthSelect.value) || 1;
-            const lastDay = new Date(year, month, 0).getDate();
-
-            daySelect.innerHTML = '<option value="">일</option>';
-            for (let d = 1; d <= lastDay; d++) {
-                daySelect.innerHTML += `<option value="${d.toString().padStart(2, '0')}">${d}일</option>`;
-            }
-
-            if (parseInt(daySelect.value) > lastDay) {
-                daySelect.value = '';
-            }
-        }
-	    
-	// URL 복사 함수
-        function copyUrl() {
-            const url = window.location.href;
-            navigator.clipboard.writeText(url).then(() => {
-                alert('주소가 클립보드에 복사되었습니다.');
-            }).catch(err => {
-                console.error('URL 복사 실패:', err);
-                alert('주소 복사에 실패했습니다.');
-            });
-        }
-
-        // 공유하기 함수
-        function shareUrl() {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Tarot Birth-Card Reading',
-                    url: window.location.href
-                }).catch(err => {
-                    console.error('공유하기 실패:', err);
-                });
-            } else {
-                copyUrl(); // 공유 API를 지원하지 않는 경우 URL 복사로 대체
-            }
-        }
-
-        // 초기화
-        initializeDateSelects();
-	    
-        function calculateCards() {
-            if (!validateInputs()) return;
-        
-            const year = parseInt(yearSelect.value);
-            const month = parseInt(monthSelect.value);
-            const day = parseInt(daySelect.value);
-            const isSolar = document.querySelector('input[name="calendarType"]:checked').value === 'solar';
-        
-            try {
-                const dateInfo = convertDate(year, month, day, isSolar);
-        
-                // 결과 표시
-                document.getElementById('solarDate').textContent = 
-                    `양력: ${dateInfo.solar.year}년 ${dateInfo.solar.month}월 ${dateInfo.solar.day}일`;
-                document.getElementById('lunarDate').textContent = 
-                    `음력: ${dateInfo.lunar.year}년 ${dateInfo.lunar.month}월 ${dateInfo.lunar.day}일`;
-        
-                // 양력 계산
-                const solarInitialSum = dateInfo.solar.year + dateInfo.solar.month + dateInfo.solar.day;
-                const solarResult = calculateBirthNumber(solarInitialSum);
-                
-                // 음력 계산
-                const lunarInitialSum = dateInfo.lunar.year + dateInfo.lunar.month + dateInfo.lunar.day;
-                const lunarResult = calculateBirthNumber(lunarInitialSum);
-        
-                // 카드 정보 표시
-                displayCardInfo('solarCardInfo', solarResult.finalSum);
-                displayCardInfo('lunarCardInfo', lunarResult.finalSum);
-                displayCardInfo('shadowCardInfo', 22 - solarResult.finalSum);
-        
-                // 소울 카드: 첫 번째 합계가 22 이상일 때만 계산
-                if (solarResult.firstSum >= 22) {
-                    displayCardInfo('soulCardInfo', solarResult.firstSum - 22);
-                } else {
-                    displayCardInfo('soulCardInfo', null);
-                }
-                document.getElementById('errorContainer').textContent = '';
-
-            } catch (error) {
-                console.error('Error in calculateCards:', error);
-                document.getElementById('errorContainer').textContent = error.message;
-                clearDisplays();
-            }
-        }
-
-
-        function validateInputs() {
-            if (!yearSelect.value || !monthSelect.value || !daySelect.value) {
-                document.getElementById('errorContainer').textContent = '년, 월, 일을 모두 선택해주세요.';
-                return false;
-            }
-            return true;
-        }
-
-
-        function calculateBirthNumber(number) {
-            // 생년월일 합계의 각 자리수를 더한 첫 번째 결과
-            const firstSum = String(number).split('').map(Number).reduce((a, b) => a + b, 0);
-            
-            // 21을 초과하는 경우에만 한번 더 각 자리수를 더함
-            if (firstSum > 21) {
-                const finalSum = String(firstSum).split('').map(Number).reduce((a, b) => a + b, 0);
-                return {
-                    firstSum: firstSum,  // 소울 카드 계산용
-                    finalSum: finalSum   // 최종 카드 번호
-                };
-            }
-            
-            return {
-                firstSum: firstSum,
-                finalSum: firstSum
-            };
-        }
-
-
-        function displayCardInfo(elementId, cardNumber) {
-            const cardInfoDiv = document.getElementById(elementId);
-            
-            // 소울 카드이고 숫자가 21 이하인 경우
-            if (elementId === 'soulCardInfo' && cardNumber <= null) {
-                cardInfoDiv.innerHTML = `
-                    <div class="card-name">N/A</div>
-                    <div class="card-meaning">해당 없음</div>
-                `;
-                return;
-            }
-            
-            const card = tarotCards[(cardNumber - 1 + tarotCards.length) % tarotCards.length];
+        // 카드 번호가 null이거나 유효하지 않은 경우
+        if (cardNumber === null || cardNumber === undefined) {
             cardInfoDiv.innerHTML = `
-                <div class="card-name">${card.number}. ${card.name}</div>
-                <div class="card-meaning">${card.meaning}</div>
+                <div class="card-name">N/A</div>
+                <div class="card-meaning">해당 없음</div>
             `;
+            cardImage.style.display = 'none';
+            return;
         }
+        
+        // 카드 번호에 맞는 타로 카드 정보 가져오기
+        const normalizedCardNumber = (cardNumber - 1 + tarotCards.length) % tarotCards.length;
+        const card = tarotCards[normalizedCardNumber];
+        
+        // 이미지 경로 설정 (카드 번호에 맞게)
+        const cardNum = card.number;
+        cardImage.src = `tarot-${cardNum}.jpg`; // 이미지 파일 확장자에 맞게 수정 (.jpg 또는 .png)
+        cardImage.alt = card.name;
+        cardImage.style.display = 'block';
+        
+        // 카드 정보 표시
+        cardInfoDiv.innerHTML = `
+            <div class="card-name">${card.number}. ${card.name}</div>
+            <div class="card-meaning">${card.meaning}</div>
+        `;
+    }
 
-        function clearDisplays() {
-            document.getElementById('solarDate').textContent = '양력: -';
-            document.getElementById('lunarDate').textContent = '음력: -';
-            document.getElementById('solarCardInfo').innerHTML = '';
-            document.getElementById('lunarCardInfo').innerHTML = '';
-            document.getElementById('shadowCardInfo').innerHTML = '';
-            document.getElementById('soulCardInfo').innerHTML = '';
-        }
+    // 결과 초기화 함수에도 이미지 숨김 처리 추가
+    function clearDisplays() {
+        document.getElementById('solarDate').textContent = '양력: -';
+        document.getElementById('lunarDate').textContent = '음력: -';
+        document.getElementById('solarCardInfo').innerHTML = '';
+        document.getElementById('lunarCardInfo').innerHTML = '';
+        document.getElementById('shadowCardInfo').innerHTML = '';
+        document.getElementById('soulCardInfo').innerHTML = '';
+        
+        // 이미지 초기화
+        document.getElementById('solarCardImage').style.display = 'none';
+        document.getElementById('lunarCardImage').style.display = 'none';
+        document.getElementById('shadowCardImage').style.display = 'none';
+        document.getElementById('soulCardImage').style.display = 'none';
+    }
 
-        yearSelect.addEventListener('change', updateDays);
-        monthSelect.addEventListener('change', updateDays);
-
-        // 이벤트 리스너 등록
-        document.querySelectorAll('input[name="calendarType"]').forEach(radio => {
-            radio.addEventListener('change', calculateCards);
-        });
-        yearSelect.addEventListener('change', calculateCards);
-        monthSelect.addEventListener('change', calculateCards);
-        daySelect.addEventListener('change', calculateCards);
-
-        // 초기화
-        initializeDateSelects();
-        calculateCards();
-	// 결과 복사 함수
-	function copyResult() {
-	    const cardResults = document.querySelector('.card-result');
-	    const solarDate = document.getElementById('solarDate').textContent;
-	    const lunarDate = document.getElementById('lunarDate').textContent;
-	    const text = `${solarDate}\n${lunarDate}\n\n` + Array.from(cardResults.querySelectorAll('.card')).map(card => {
-	        const title = card.querySelector('h3').textContent;
-	        const info = card.querySelector('.card-info').textContent.trim();
-	        const cardName = info.split('\n')[0].trim();
-	        const cardMeaning = info.split('\n')[1].trim();
-	        return `${title}\n${cardName}\n${cardMeaning}`;
-	    }).join('\n\n');
-	    
-	    navigator.clipboard.writeText(text).then(() => {
-	        const btn = document.getElementById('copyBtn');
-	        btn.innerHTML = '복사 완료!';
-	        setTimeout(() => {
-	            btn.innerHTML = '<span>결과 복사</span>';
-	        }, 2000);
-	    });
-	}
-	    // 이미지 저장 함수
-	function saveImage() {
-	    const element = document.querySelector('.card-result');
-	    html2canvas(element).then(canvas => {
-	        const link = document.createElement('a');
-	        link.download = 'tarot-reading.png';
-	        link.href = canvas.toDataURL();
-	        link.click();
-	        
-	        const btn = document.getElementById('saveBtn');
-	        btn.innerHTML = '저장 완료!';
-	        setTimeout(() => {
-	            btn.innerHTML = '<span>이미지 저장</span>';
-	        }, 2000);
-	    });
-	}
-	// 결과 공유 함수
-	async function shareResult() {
-	    const cardResults = document.querySelector('.card-result');
-	    const solarDate = document.getElementById('solarDate').textContent;
-	    const lunarDate = document.getElementById('lunarDate').textContent;
-	    const text = `${solarDate}\n${lunarDate}\n\n` + Array.from(cardResults.querySelectorAll('.card')).map(card => {
-	        const title = card.querySelector('h3').textContent;
-	        const info = card.querySelector('.card-info').textContent.trim();
-	        const cardName = info.split('\n')[0].trim();
-	        const cardMeaning = info.split('\n')[1].trim();
-	        return `${title}\n${cardName}\n${cardMeaning}`;
-	    }).join('\n\n');
-	
-	    try {
-	        const canvas = await html2canvas(cardResults);
-	        canvas.toBlob(async (blob) => {
-	            const files = [new File([blob], 'tarot-reading.png', { type: 'image/png' })];
-	            
-	            if (navigator.share) {
-	                try {
-	                    await navigator.share({
-	                        text: text,
-	                        files: files
-	                    });
-	                    const btn = document.getElementById('shareBtn');
-	                    btn.innerHTML = '공유 완료!';
-	                    setTimeout(() => {
-	                        btn.innerHTML = '<span>결과 공유</span>';
-	                    }, 2000);
-	                } catch (error) {
-	                    try {
-	                        await navigator.share({
-	                            text: text
-	                        });
-	                        const btn = document.getElementById('shareBtn');
-	                        btn.innerHTML = '공유 완료!';
-	                        setTimeout(() => {
-	                            btn.innerHTML = '<span>결과 공유</span>';
-	                        }, 2000);
-	                    } catch (error) {
-	                        copyResult();
-	                    }
-	                }
-	            } else {
-	                copyResult();
-	            }
-	        });
-	    } catch (error) {
-	        if (navigator.share) {
-	            try {
-	                await navigator.share({
-	                    text: text
-	                });
-	                const btn = document.getElementById('shareBtn');
-	                btn.innerHTML = '공유 완료!';
-	                setTimeout(() => {
-	                    btn.innerHTML = '<span>결과 공유</span>';
-	                }, 2000);
-	            } catch (error) {
-	                copyResult();
-	            }
-	        } else {
-	            copyResult();
-	        }
-	    }
-	}	
-	// 페이지 로드 시 모바일 체크
-	window.addEventListener('load', function() {
-	    const shareBtn = document.getElementById('shareBtn');
-	    if (!navigator.share || !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
-	        shareBtn.style.display = 'none';
-	    }
-	});
-    </script>
-</body>
-</html>
+    // 이미지 로드 오류 처리
+    document.querySelectorAll('.card-image').forEach(img => {
+        img.onerror = function() {
+            this.src = 'tarot-default.jpg'; // 기본 이미지 (준비해두시면 좋습니다)
+            if(this.src.includes('tarot-default.jpg')) {
+                this.style.display = 'none'; // 기본 이미지도 없으면 숨김
+            }
+        };
+    });
+</script>
