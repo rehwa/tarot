@@ -980,7 +980,7 @@
 
         function validateInputs() {
             if (!yearSelect.value || !monthSelect.value || !daySelect.value) {
-                document.getElementById('errorContainer').textContent = '년, 월, 일을 모두 선택해주세요.';
+                document.getElementById('errorContainer').textContent = '';
                 return false;
             }
             return true;
