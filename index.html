@@ -33,6 +33,14 @@
 	    font-weight: bold;
 	}
 	
+	.note {
+	    text-align: center;
+	    color: #4a90e2;
+	    font-size: 12px;
+	    margin-top: -15px;
+	    margin-bottom: 20px;
+	}
+	
 	.container {
 	    background-color: white;
 	    padding: 20px;
@@ -270,6 +278,7 @@
     <div class="container">
         <h1>타로 생일카드 찾기</h1>
 	<p class="subtitle">유니버셜웨이트로 열어보는<br>나의 타로 생일카드</p>
+        <p class="note">※ 카드 결과가 중복되는 경우도 있어요.<br>※ 내 생일수에 소울(SOUL) 카드가 없을 수도 있어요.</p>
         <div id="errorContainer" class="error-message" role="alert"></div>
 
         <div class="input-group">
@@ -1054,7 +1063,7 @@
             if (cardNumber === null || cardNumber === undefined) {
                 cardInfoDiv.innerHTML = `
                     <div class="card-name">-</div>
-                    <div class="card-meaning">해당 없음</div>
+                    <div class="card-meaning">나의 생일수에 소울(SOUL) 카드는 없어요.</div>
                 `;
                 cardImage.style.display = 'none';
                 return;
