@@ -1134,10 +1134,41 @@
 	        }, 2000);
 	    });
 	}
-	    // 이미지 저장 함수
+	// 이미지 저장 함수
 	function saveImage() {
+	    // 원래 카드 결과 컨테이너
 	    const element = document.querySelector('.card-result');
-	    html2canvas(element).then(canvas => {
+	    
+	    // 임시 컨테이너 생성
+	    const tempContainer = document.createElement('div');
+	    tempContainer.style.padding = '20px';
+	    tempContainer.style.backgroundColor = 'white';
+	    tempContainer.style.borderRadius = '12px';
+	    
+	    // 날짜 정보 추가
+	    const dateInfo = document.createElement('div');
+	    dateInfo.style.fontSize = '16px';
+	    dateInfo.style.marginBottom = '15px';
+	    dateInfo.style.textAlign = 'center';
+	    dateInfo.style.fontWeight = 'bold';
+	    dateInfo.innerHTML = `${document.getElementById('solarDate').textContent}<br>${document.getElementById('lunarDate').textContent}`;
+	    tempContainer.appendChild(dateInfo);
+	    
+	    // 원래 컨텐츠 복제
+	    const clonedContent = element.cloneNode(true);
+	    tempContainer.appendChild(clonedContent);
+	    
+	    // 기존 페이지에 임시로 추가
+	    document.body.appendChild(tempContainer);
+	    tempContainer.style.position = 'absolute';
+	    tempContainer.style.left = '-9999px';
+	    
+	    // html2canvas로 이미지 생성
+	    html2canvas(tempContainer).then(canvas => {
+	        // 임시 컨테이너 제거
+	        document.body.removeChild(tempContainer);
+	        
+	        // 이미지 다운로드
 	        const link = document.createElement('a');
 	        link.download = 'tarot-reading.png';
 	        link.href = canvas.toDataURL();
