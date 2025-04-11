@@ -257,8 +257,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Tarot Birth Cards Reading</h1>
-	<p class="subtitle">Understanding Essence:<br>The Meaning within Tarot Birth Cards</p>
+        <h1>타로 생일 카드 리딩</h1>
+	<p class="subtitle">영혼의 거울<br>타로 카드로 보는 당신의 본질</p>
         <div id="errorContainer" class="error-message" role="alert"></div>
 
         <div class="input-group">
@@ -286,46 +286,51 @@
             </div>
         </div>
 
-        <div class="card-result">
-            <div class="card">
-                <h3>양력(SOLAR) 카드</h3>
-                <div class="date-display" id="solarDate">양력: -</div>
-                <div class="card-content">
-                    <img src="" alt="Solar Card" class="card-image" id="solarCardImage" style="display: none;">
-                    <div class="card-text">
-                        <div id="solarCardInfo" class="card-info"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h3>음력(LUNAR) 카드</h3>
-                <div class="date-display" id="lunarDate">음력: -</div>
-                <div class="card-content">
-                    <img src="" alt="Lunar Card" class="card-image" id="lunarCardImage" style="display: none;">
-                    <div class="card-text">
-                        <div id="lunarCardInfo" class="card-info"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h3>그림자(SHADOW) 카드</h3>
-                <div class="card-content">
-                    <img src="" alt="Shadow Card" class="card-image" id="shadowCardImage" style="display: none;">
-                    <div class="card-text">
-                        <div id="shadowCardInfo" class="card-info"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h3>소울(SOUL) 카드</h3>
-                <div class="card-content">
-                    <img src="" alt="Soul Card" class="card-image" id="soulCardImage" style="display: none;">
-                    <div class="card-text">
-                        <div id="soulCardInfo" class="card-info"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+	<!-- 카드 결과 섹션 수정 -->
+	<div class="card-result">
+	    <div class="card">
+	        <h3>양력(SOLAR) 카드</h3>
+	        <div class="card-description">나의 성격, 성향, 가치관</div>
+		<div class="date-display" id="solarDate">양력: -</div>
+	        <div class="card-content">
+	            <img src="" alt="Solar Card" class="card-image" id="solarCardImage" style="display: none;">
+	            <div class="card-text">
+	                <div id="solarCardInfo" class="card-info"></div>
+	            </div>
+	        </div>
+	    </div>
+	    <div class="card">
+	        <h3>음력(LUNAR) 카드</h3>
+	        <div class="card-description">대외적으로 보여지고픈 이미지</div>
+		<div class="date-display" id="lunarDate">음력: -</div>
+	        <div class="card-content">
+	            <img src="" alt="Lunar Card" class="card-image" id="lunarCardImage" style="display: none;">
+	            <div class="card-text">
+	                <div id="lunarCardInfo" class="card-info"></div>
+	            </div>
+	        </div>
+	    </div>
+	    <div class="card">
+	        <h3>그림자(SHADOW) 카드</h3>
+	        <div class="card-description">나의 무의식 진짜 내면</div>
+	        <div class="card-content">
+	            <img src="" alt="Shadow Card" class="card-image" id="shadowCardImage" style="display: none;">
+	            <div class="card-text">
+	                <div id="shadowCardInfo" class="card-info"></div>
+	            </div>
+	        </div>
+	    </div>
+	    <div class="card">
+	        <h3>소울(SOUL) 카드</h3>
+	        <div class="card-description">영적인 나 자신을 상징</div>
+	        <div class="card-content">
+	            <img src="" alt="Soul Card" class="card-image" id="soulCardImage" style="display: none;">
+	            <div class="card-text">
+	                <div id="soulCardInfo" class="card-info"></div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
 	            <!-- 여기에 새로운 footer 추가 -->
         <div class="footer">
             <div class="share-buttons">
@@ -346,7 +351,7 @@
                 </button>
             </div>
             <div class="copyright">
-                LENA Academy & Curated by HONGDAN REHWA MONGHYEONIL, in the JWF<br>
+                LENA Academy & Curated by REHWA HONGDAN, in the JWF<br>
 		© 2025 JWF. All rights reserved.
             </div>
         </div>
@@ -1085,18 +1090,30 @@
                 }
             };
         });
-// 결과 복사 함수
+	// 결과 복사 함수
 	function copyResult() {
 	    const cardResults = document.querySelector('.card-result');
 	    const solarDate = document.getElementById('solarDate').textContent;
 	    const lunarDate = document.getElementById('lunarDate').textContent;
-	    const text = `${solarDate}\n${lunarDate}\n\n` + Array.from(cardResults.querySelectorAll('.card')).map(card => {
+	    
+	    // 양력 날짜, 음력 날짜 정보 포함
+	    let text = `${solarDate}\n${lunarDate}\n\n`;
+	    
+	    // 각 카드 정보 추가
+	    Array.from(cardResults.querySelectorAll('.card')).forEach(card => {
 	        const title = card.querySelector('h3').textContent;
+	        const description = card.querySelector('.card-description') ? 
+	                           card.querySelector('.card-description').textContent : '';
 	        const info = card.querySelector('.card-info').textContent.trim();
-	        const cardName = info.split('\n')[0].trim();
-	        const cardMeaning = info.split('\n')[1].trim();
-	        return `${title}\n${cardName}\n${cardMeaning}`;
-	    }).join('\n\n');
+	        
+	        text += `${title} (${description})\n`;
+	        if (info) {
+	            const cardName = info.split('\n')[0].trim();
+	            const cardMeaning = info.split('\n')[1] ? info.split('\n')[1].trim() : '';
+	            text += `${cardName}\n${cardMeaning}`;
+	        }
+	        text += '\n\n';
+	    });
 	    
 	    navigator.clipboard.writeText(text).then(() => {
 	        const btn = document.getElementById('copyBtn');
@@ -1122,18 +1139,30 @@
 	        }, 2000);
 	    });
 	}
-	// 결과 공유 함수
+	// 결과 공유 함수 수정
 	async function shareResult() {
 	    const cardResults = document.querySelector('.card-result');
 	    const solarDate = document.getElementById('solarDate').textContent;
 	    const lunarDate = document.getElementById('lunarDate').textContent;
-	    const text = `${solarDate}\n${lunarDate}\n\n` + Array.from(cardResults.querySelectorAll('.card')).map(card => {
+	    
+	    // 양력 날짜, 음력 날짜 정보 포함
+	    let text = `${solarDate}\n${lunarDate}\n\n`;
+	    
+	    // 각 카드 정보 추가
+	    Array.from(cardResults.querySelectorAll('.card')).forEach(card => {
 	        const title = card.querySelector('h3').textContent;
+	        const description = card.querySelector('.card-description') ? 
+	                           card.querySelector('.card-description').textContent : '';
 	        const info = card.querySelector('.card-info').textContent.trim();
-	        const cardName = info.split('\n')[0].trim();
-	        const cardMeaning = info.split('\n')[1].trim();
-	        return `${title}\n${cardName}\n${cardMeaning}`;
-	    }).join('\n\n');
+	        
+	        text += `${title} (${description})\n`;
+	        if (info) {
+	            const cardName = info.split('\n')[0].trim();
+	            const cardMeaning = info.split('\n')[1] ? info.split('\n')[1].trim() : '';
+	            text += `${cardName}\n${cardMeaning}`;
+	        }
+	        text += '\n\n';
+	    });
 	
 	    try {
 	        const canvas = await html2canvas(cardResults);
@@ -1187,7 +1216,7 @@
 	            copyResult();
 	        }
 	    }
-	}	
+	}
 	// 페이지 로드 시 모바일 체크 및 이벤트 리스너 설정
 window.addEventListener('load', function() {
     // 공유 버튼 표시 여부 설정
